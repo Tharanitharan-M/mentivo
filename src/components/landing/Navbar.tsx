@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import Link from "next/link";
+import Image from "next/image";
 
 const NAV_LINKS = [
   { label: "Features", href: "#features" },
@@ -38,22 +39,15 @@ export default function Navbar() {
     >
       <div className="max-w-7xl mx-auto px-5 sm:px-8 h-[60px] flex items-center justify-between">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2.5 shrink-0">
-          <div className="w-7 h-7 rounded-[7px] bg-blue-500 flex items-center justify-center shadow-lg shadow-blue-500/25">
-            <svg
-              viewBox="0 0 16 16"
-              className="w-4 h-4 text-white"
-              fill="none"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M8 2a4 4 0 014 4c0 1.5-.8 2.8-2 3.5V11H6V9.5A4 4 0 018 2zm-1 9h2m-1 2v1"
-              />
-            </svg>
-          </div>
+        <Link href="/" className="flex items-center gap-2 shrink-0">
+          <Image
+            src="/logo-mark.png"
+            alt="Mentivo logo"
+            width={36}
+            height={36}
+            className="rounded-lg"
+            priority
+          />
           <span className="font-bold text-[15px] text-white tracking-[-0.02em]">
             Mentivo
           </span>
@@ -75,13 +69,13 @@ export default function Navbar() {
         {/* Right actions */}
         <div className="hidden md:flex items-center gap-2">
           <Link
-            href="#"
+            href="/signin"
             className="px-4 py-2 text-[13px] font-medium text-slate-400 hover:text-white transition-colors"
           >
             Sign in
           </Link>
           <Link
-            href="#"
+            href="/signup"
             className="btn-shimmer flex items-center gap-1.5 px-4 py-2 rounded-lg bg-blue-500 text-white text-[13px] font-semibold hover:bg-blue-400 transition-all shadow-md shadow-blue-500/20"
           >
             Start for free
@@ -147,13 +141,13 @@ export default function Navbar() {
           ))}
           <div className="pt-3 border-t border-white/[0.06] flex flex-col gap-2">
             <Link
-              href="#"
+              href="/signin"
               className="px-3 py-2.5 text-sm text-slate-400 hover:text-white transition-colors"
             >
               Sign in
             </Link>
             <Link
-              href="#"
+              href="/signup"
               className="px-4 py-2.5 rounded-lg bg-blue-500 text-white text-sm font-semibold text-center"
             >
               Start for free
