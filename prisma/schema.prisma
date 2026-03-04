@@ -25,6 +25,7 @@ model User {
 
   accounts Account[]
   sessions Session[]
+  projects Project[]
 }
 
 model Account {
@@ -63,4 +64,49 @@ model VerificationToken {
   expires    DateTime
 
   @@id([identifier, token])
+}
+
+// ─── Mentivo App Models ────────────────────────────────────────────────────────
+
+model Project {
+  id        String        @id @default(cuid())
+  userId    String
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  idea      String        @db.Text
+  status    ProjectStatus @default(ONBOARDING)
+  level     String?
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  messages Message[]
+  quiz     Quiz?
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  role      String
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+}
+
+model Quiz {
+  id          String    @id @default(cuid())
+  projectId   String    @unique
+  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  questions   Json
+  answers     Json?
+  score       Float?
+  level       String?
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+}
+
+enum ProjectStatus {
+  ONBOARDING
+  QUIZ
+  ACTIVE
+  COMPLETED
 }
