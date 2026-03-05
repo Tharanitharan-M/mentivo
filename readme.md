@@ -10,6 +10,10 @@ Most people who want to learn web development hit the same wall. They watch tuto
 
 The rise of AI tools made this worse in a different way. Now you can describe what you want and have it write all the code for you in seconds. The app gets built, but you have no idea what happened. You copy and paste, tweak a few things, and eventually you have something that sort of works, but you could not explain a single line of it if someone asked.
 
+Then came AI builders like Cursor, Lovable, and a dozen others. These tools are genuinely impressive. You type what you want, a diff shows up, and you click accept. Again and again and again. The whole app materialises in front of you without you writing a single meaningful line. It feels productive, and in some ways it is, but it is not learning. You are not a developer at the end of it. You are just someone who got good at describing things to an AI and clicking accept.
+
+The moment something breaks, or someone asks you to explain your own code, or you need to build something the AI does not quite understand, you are completely stuck. Because you never actually learned anything. You just watched it happen.
+
 There is no real learning happening. Just delegation.
 
 ---
