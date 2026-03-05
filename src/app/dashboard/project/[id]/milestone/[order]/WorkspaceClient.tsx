@@ -507,6 +507,7 @@ export default function WorkspaceClient({
         gradient={gradient}
         projectId={project.id}
         nextMilestone={nextMilestone}
+        onReviewRevisit={() => setPhase("workspace")}
       />
     );
   }
@@ -681,6 +682,16 @@ export default function WorkspaceClient({
               </svg>
               <span className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">Learn</span>
             </div>
+
+            {/* Revisit banner when milestone is already complete */}
+            {milestone.status === "COMPLETED" && (
+              <div className="mx-5 mt-3 flex items-center gap-2 px-3 py-2.5 rounded-xl bg-green-500/[0.08] border border-green-500/20 flex-shrink-0">
+                <svg className="w-4 h-4 text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                <p className="text-green-300 text-[11px] font-medium">You’ve completed this milestone. Review your work below or use Next when you’re ready.</p>
+              </div>
+            )}
 
             {/* Scrollable content */}
             <div className="flex-1 overflow-y-auto px-5 py-4">
@@ -1268,12 +1279,20 @@ function MilestoneQuiz({ questions, milestone, gradient, onComplete, onBack, pro
 }
 
 // ─── Milestone Complete ────────────────────────────────────────────────────────
-function MilestoneComplete({ milestone, quizResult, gradient, projectId, nextMilestone }: {
+function MilestoneComplete({
+  milestone,
+  quizResult,
+  gradient,
+  projectId,
+  nextMilestone,
+  onReviewRevisit,
+}: {
   milestone: { order: number; title: string };
   quizResult: QuizResult | null;
   gradient: string;
   projectId: string;
   nextMilestone: { id: string; order: number; title: string } | null;
+  onReviewRevisit?: () => void;
 }) {
   return (
     <div className="min-h-screen bg-[#07080f] flex items-center justify-center p-5">
@@ -1294,18 +1313,38 @@ function MilestoneComplete({ milestone, quizResult, gradient, projectId, nextMil
         </div>
         <div className="flex flex-col gap-3">
           {nextMilestone && (
-            <Link href={`/dashboard/project/${projectId}/milestone/${nextMilestone.order}`}
-              className={`flex items-center justify-between px-5 py-3 rounded-xl bg-gradient-to-r ${gradient} text-white text-sm font-semibold`}>
+            <Link
+              href={`/dashboard/project/${projectId}/milestone/${nextMilestone.order}`}
+              className={`flex items-center justify-between px-5 py-3 rounded-xl bg-gradient-to-r ${gradient} text-white text-sm font-semibold`}
+            >
               <span className="flex flex-col items-start">
                 <span className="text-[10px] opacity-70 uppercase tracking-wider">Next Milestone</span>
                 <span className="truncate max-w-[220px]">{nextMilestone.title}</span>
               </span>
-              <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+              <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
             </Link>
           )}
-          <Link href={`/dashboard/project/${projectId}/roadmap`}
-            className="flex items-center justify-center gap-2 py-3 rounded-xl border border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.05] text-slate-400 text-sm font-medium transition-all">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" /></svg>
+          {onReviewRevisit && (
+            <button
+              type="button"
+              onClick={onReviewRevisit}
+              className="flex items-center justify-center gap-2 py-3 rounded-xl border border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.05] text-slate-300 text-sm font-medium transition-all"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+              </svg>
+              Review and revisit
+            </button>
+          )}
+          <Link
+            href={`/dashboard/project/${projectId}/roadmap`}
+            className="flex items-center justify-center gap-2 py-3 rounded-xl border border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.05] text-slate-400 text-sm font-medium transition-all"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+            </svg>
             Back to Roadmap
           </Link>
         </div>
