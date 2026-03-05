@@ -223,6 +223,8 @@ export default function RoadmapClient({ project, milestones, userName }: Props) 
             {milestones.map((milestone, i) => {
               const isEven = i % 2 === 0;
               const diff = DIFFICULTY_STYLE[milestone.difficulty] ?? DIFFICULTY_STYLE.easy;
+              const isCompleted = milestone.status === "COMPLETED";
+              const isInProgress = milestone.status === "IN_PROGRESS";
 
               return (
                 <div
@@ -235,12 +237,24 @@ export default function RoadmapClient({ project, milestones, userName }: Props) 
                   <div
                     ref={(el) => { nodeRefs.current[i] = el; }}
                     className={`absolute left-0 sm:left-1/2 sm:-translate-x-1/2 top-5 w-12 h-12 rounded-xl flex items-center justify-center font-black text-lg z-10 border-2 ${
-                      i === 0
+                      isCompleted
+                        ? "bg-green-500/10 border-green-500/40 text-green-400"
+                        : isInProgress
+                        ? "bg-blue-500/10 border-blue-500/40 text-blue-400"
+                        : i === 0
                         ? `bg-gradient-to-br ${gradient} border-white/20 text-white shadow-lg`
                         : "bg-[#0d0f1a] border-white/[0.12] text-slate-400"
                     }`}
                   >
-                    {i === 0 ? (
+                    {isCompleted ? (
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                      </svg>
+                    ) : isInProgress ? (
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                      </svg>
+                    ) : i === 0 ? (
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
                       </svg>
@@ -254,9 +268,15 @@ export default function RoadmapClient({ project, milestones, userName }: Props) 
                     ref={(el) => { cardRefs.current[i] = el; }}
                     className={`w-full sm:w-[calc(50%-2rem)] group`}
                   >
-                    <div className="relative rounded-2xl border border-white/[0.07] bg-white/[0.02] hover:border-blue-500/25 hover:bg-white/[0.035] transition-all duration-300 overflow-hidden">
+                    <div className={`relative rounded-2xl border transition-all duration-300 overflow-hidden ${
+                      isCompleted
+                        ? "border-green-500/20 bg-green-500/[0.03] hover:border-green-500/30"
+                        : isInProgress
+                        ? "border-blue-500/20 bg-blue-500/[0.03] hover:border-blue-500/30"
+                        : "border-white/[0.07] bg-white/[0.02] hover:border-blue-500/25 hover:bg-white/[0.035]"
+                    }`}>
                       {/* Top accent line */}
-                      <div className={`h-[2px] w-full bg-gradient-to-r ${gradient} opacity-40`} />
+                      <div className={`h-[2px] w-full ${isCompleted ? "bg-gradient-to-r from-green-400 to-emerald-500" : `bg-gradient-to-r ${gradient} opacity-40`}`} />
 
                       <div className="p-5">
                         {/* Header row */}
@@ -269,8 +289,18 @@ export default function RoadmapClient({ project, milestones, userName }: Props) 
                               <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${diff.bg} ${diff.border} ${diff.text}`}>
                                 {milestone.difficulty}
                               </span>
+                              {isCompleted && (
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-green-500/10 border-green-500/25 text-green-400">
+                                  ✓ Completed
+                                </span>
+                              )}
+                              {isInProgress && (
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-blue-500/10 border-blue-500/25 text-blue-400">
+                                  In Progress
+                                </span>
+                              )}
                             </div>
-                            <h3 className="text-white font-bold text-base leading-snug">
+                            <h3 className={`font-bold text-base leading-snug ${isCompleted ? "text-green-200" : "text-white"}`}>
                               {milestone.title}
                             </h3>
                           </div>
@@ -309,10 +339,16 @@ export default function RoadmapClient({ project, milestones, userName }: Props) 
                         {/* CTA */}
                         <Link
                           href={`/dashboard/project/${project.id}/milestone/${milestone.order}`}
-                          className={`flex items-center justify-between w-full px-4 py-2.5 rounded-xl bg-gradient-to-r ${gradient} bg-opacity-10 border border-white/[0.08] group-hover:border-blue-500/20 transition-all`}
+                          className={`flex items-center justify-between w-full px-4 py-2.5 rounded-xl border transition-all ${
+                            isCompleted
+                              ? "bg-green-500/[0.07] border-green-500/20 hover:bg-green-500/[0.12]"
+                              : `bg-gradient-to-r ${gradient} bg-opacity-10 border-white/[0.08] group-hover:border-blue-500/20`
+                          }`}
                         >
-                          <span className="text-sm font-semibold text-white">Learn the concept</span>
-                          <svg className="w-4 h-4 text-white/70 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <span className={`text-sm font-semibold ${isCompleted ? "text-green-300" : "text-white"}`}>
+                            {isCompleted ? "Review & revisit" : isInProgress ? "Continue building" : "Start this milestone"}
+                          </span>
+                          <svg className={`w-4 h-4 group-hover:translate-x-1 transition-transform ${isCompleted ? "text-green-400/70" : "text-white/70"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                           </svg>
                         </Link>

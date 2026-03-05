@@ -106,10 +106,25 @@ model Milestone {
   tags           String[]
   status         MilestoneStatus @default(UNLOCKED)
   conceptContent String?         @db.Text
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
+  starterCode      String?         @db.Text
+  code             String?         @db.Text
+  tasks            Json?
+  completedTaskIds String[]        @default([])
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  messages         MilestoneMessage[]
 
   @@unique([roadmapId, order])
+}
+
+model MilestoneMessage {
+  id          String    @id @default(cuid())
+  milestoneId String
+  milestone   Milestone @relation(fields: [milestoneId], references: [id], onDelete: Cascade)
+  role        String
+  content     String    @db.Text
+  createdAt   DateTime  @default(now())
 }
 
 enum MilestoneStatus {
