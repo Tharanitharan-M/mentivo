@@ -1,555 +1,205 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import Link from "next/link";
+import Image from "next/image";
 
-/* ─── Code data ─────────────────────────────────────────── */
-type Token = { t: string; c: string };
-type Line = Token[];
-type FileData = { lines: Line[]; cursorLine: number };
-
-const FILES: Record<string, FileData> = {
-  "App.jsx": {
-    cursorLine: 8,
-    lines: [
-      [
-        { t: "import", c: "tok-kw" },
-        { t: " { ", c: "tok-op" },
-        { t: "useState", c: "tok-fn" },
-        { t: " } ", c: "tok-op" },
-        { t: "from", c: "tok-kw" },
-        { t: " ", c: "tok-plain" },
-        { t: "'react'", c: "tok-str" },
-      ],
-      [
-        { t: "import", c: "tok-kw" },
-        { t: " TodoItem ", c: "tok-var" },
-        { t: "from", c: "tok-kw" },
-        { t: " ", c: "tok-plain" },
-        { t: "'./TodoItem'", c: "tok-str" },
-      ],
-      [],
-      [
-        { t: "export default ", c: "tok-kw" },
-        { t: "function", c: "tok-kw" },
-        { t: " App", c: "tok-fn" },
-        { t: "() {", c: "tok-op" },
-      ],
-      [
-        { t: "  ", c: "tok-plain" },
-        { t: "const", c: "tok-kw" },
-        { t: " [", c: "tok-op" },
-        { t: "todos", c: "tok-var" },
-        { t: ", ", c: "tok-op" },
-        { t: "setTodos", c: "tok-fn" },
-        { t: "] = ", c: "tok-op" },
-        { t: "useState", c: "tok-fn" },
-        { t: "([", c: "tok-op" },
-        { t: "])", c: "tok-op" },
-      ],
-      [
-        { t: "  ", c: "tok-plain" },
-        { t: "const", c: "tok-kw" },
-        { t: " [", c: "tok-op" },
-        { t: "input", c: "tok-var" },
-        { t: ", ", c: "tok-op" },
-        { t: "setInput", c: "tok-fn" },
-        { t: "] = ", c: "tok-op" },
-        { t: "useState", c: "tok-fn" },
-        { t: "('')", c: "tok-str" },
-      ],
-      [],
-      [
-        { t: "  ", c: "tok-plain" },
-        { t: "const", c: "tok-kw" },
-        { t: " addTodo", c: "tok-fn" },
-        { t: " = () => {", c: "tok-op" },
-      ],
-      [
-        { t: "    ", c: "tok-plain" },
-        { t: "setTodos", c: "tok-fn" },
-        { t: "([...", c: "tok-op" },
-        { t: "todos", c: "tok-var" },
-        { t: ", {", c: "tok-op" },
-      ],
-      [
-        { t: "      ", c: "tok-plain" },
-        { t: "id", c: "tok-prop" },
-        { t: ": Date.", c: "tok-op" },
-        { t: "now", c: "tok-fn" },
-        { t: "(),", c: "tok-op" },
-      ],
-      [
-        { t: "      ", c: "tok-plain" },
-        { t: "text", c: "tok-prop" },
-        { t: ": ", c: "tok-op" },
-        { t: "input", c: "tok-var" },
-        { t: ", ", c: "tok-op" },
-        { t: "done", c: "tok-prop" },
-        { t: ": ", c: "tok-op" },
-        { t: "false", c: "tok-num" },
-      ],
-      [{ t: "    }])", c: "tok-op" }],
-      [{ t: "  }", c: "tok-op" }],
-      [],
-      [
-        { t: "  ", c: "tok-plain" },
-        { t: "return", c: "tok-kw" },
-        { t: " (", c: "tok-op" },
-      ],
-      [
-        { t: "    ", c: "tok-plain" },
-        { t: "<", c: "tok-jsx" },
-        { t: "div", c: "tok-jsx" },
-        { t: " className", c: "tok-prop" },
-        { t: "=", c: "tok-op" },
-        { t: '"app"', c: "tok-str" },
-        { t: ">", c: "tok-jsx" },
-      ],
-      [
-        { t: "      {", c: "tok-op" },
-        { t: "todos", c: "tok-var" },
-        { t: ".", c: "tok-op" },
-        { t: "map", c: "tok-fn" },
-        { t: "(", c: "tok-op" },
-        { t: "todo", c: "tok-var" },
-        { t: " => (", c: "tok-op" },
-      ],
-      [
-        { t: "        ", c: "tok-plain" },
-        { t: "<", c: "tok-jsx" },
-        { t: "TodoItem", c: "tok-jsx" },
-        { t: " key", c: "tok-prop" },
-        { t: "={", c: "tok-op" },
-        { t: "todo", c: "tok-var" },
-        { t: ".", c: "tok-op" },
-        { t: "id", c: "tok-prop" },
-        { t: "} todo", c: "tok-op" },
-        { t: "={", c: "tok-op" },
-        { t: "todo", c: "tok-var" },
-        { t: "} />", c: "tok-jsx" },
-      ],
-      [{ t: "      )}", c: "tok-op" }],
-      [
-        { t: "    ", c: "tok-plain" },
-        { t: "</", c: "tok-jsx" },
-        { t: "div", c: "tok-jsx" },
-        { t: ">", c: "tok-jsx" },
-      ],
-      [{ t: "  )", c: "tok-op" }],
-      [{ t: "}", c: "tok-op" }],
-    ],
-  },
-  "TodoItem.jsx": {
-    cursorLine: 5,
-    lines: [
-      [
-        { t: "// Renders a single todo with checkbox", c: "tok-cmt" },
-      ],
-      [
-        { t: "export default ", c: "tok-kw" },
-        { t: "function", c: "tok-kw" },
-        { t: " TodoItem", c: "tok-fn" },
-        { t: "({ ", c: "tok-op" },
-        { t: "todo", c: "tok-var" },
-        { t: ", ", c: "tok-op" },
-        { t: "onToggle", c: "tok-var" },
-        { t: " }) {", c: "tok-op" },
-      ],
-      [
-        { t: "  ", c: "tok-plain" },
-        { t: "return", c: "tok-kw" },
-        { t: " (", c: "tok-op" },
-      ],
-      [
-        { t: "    ", c: "tok-plain" },
-        { t: "<", c: "tok-jsx" },
-        { t: "div", c: "tok-jsx" },
-        { t: " className", c: "tok-prop" },
-        { t: "=", c: "tok-op" },
-        { t: '"todo"', c: "tok-str" },
-        { t: ">", c: "tok-jsx" },
-      ],
-      [
-        { t: "      ", c: "tok-plain" },
-        { t: "<", c: "tok-jsx" },
-        { t: "input", c: "tok-jsx" },
-        { t: " type", c: "tok-prop" },
-        { t: "=", c: "tok-op" },
-        { t: '"checkbox"', c: "tok-str" },
-      ],
-      [
-        { t: "        checked", c: "tok-prop" },
-        { t: "={", c: "tok-op" },
-        { t: "todo", c: "tok-var" },
-        { t: ".", c: "tok-op" },
-        { t: "done", c: "tok-prop" },
-        { t: "}", c: "tok-op" },
-      ],
-      [
-        { t: "        onChange", c: "tok-prop" },
-        { t: "={() => ", c: "tok-op" },
-        { t: "onToggle", c: "tok-fn" },
-        { t: "(", c: "tok-op" },
-        { t: "todo", c: "tok-var" },
-        { t: ".", c: "tok-op" },
-        { t: "id", c: "tok-prop" },
-        { t: ")}", c: "tok-op" },
-      ],
-      [{ t: "      />", c: "tok-jsx" }],
-      [
-        { t: "      ", c: "tok-plain" },
-        { t: "<", c: "tok-jsx" },
-        { t: "span", c: "tok-jsx" },
-        { t: ">", c: "tok-jsx" },
-        { t: "{", c: "tok-op" },
-        { t: "todo", c: "tok-var" },
-        { t: ".", c: "tok-op" },
-        { t: "text", c: "tok-prop" },
-        { t: "}", c: "tok-op" },
-        { t: "</", c: "tok-jsx" },
-        { t: "span", c: "tok-jsx" },
-        { t: ">", c: "tok-jsx" },
-      ],
-      [
-        { t: "    ", c: "tok-plain" },
-        { t: "</", c: "tok-jsx" },
-        { t: "div", c: "tok-jsx" },
-        { t: ">", c: "tok-jsx" },
-      ],
-      [{ t: "  )", c: "tok-op" }],
-      [{ t: "}", c: "tok-op" }],
-    ],
-  },
-  "styles.css": {
-    cursorLine: 4,
-    lines: [
-      [{ t: "/* App styles */", c: "tok-cmt" }],
-      [{ t: ".app {", c: "tok-op" }],
-      [
-        { t: "  ", c: "tok-plain" },
-        { t: "max-width", c: "tok-prop" },
-        { t: ": ", c: "tok-op" },
-        { t: "600px", c: "tok-num" },
-        { t: ";", c: "tok-op" },
-      ],
-      [
-        { t: "  ", c: "tok-plain" },
-        { t: "margin", c: "tok-prop" },
-        { t: ": ", c: "tok-op" },
-        { t: "0 auto", c: "tok-str" },
-        { t: ";", c: "tok-op" },
-      ],
-      [
-        { t: "  ", c: "tok-plain" },
-        { t: "padding", c: "tok-prop" },
-        { t: ": ", c: "tok-op" },
-        { t: "2rem", c: "tok-num" },
-        { t: ";", c: "tok-op" },
-      ],
-      [{ t: "}", c: "tok-op" }],
-      [],
-      [{ t: ".todo {", c: "tok-op" }],
-      [
-        { t: "  ", c: "tok-plain" },
-        { t: "display", c: "tok-prop" },
-        { t: ": ", c: "tok-op" },
-        { t: "flex", c: "tok-str" },
-        { t: ";", c: "tok-op" },
-      ],
-      [
-        { t: "  ", c: "tok-plain" },
-        { t: "align-items", c: "tok-prop" },
-        { t: ": ", c: "tok-op" },
-        { t: "center", c: "tok-str" },
-        { t: ";", c: "tok-op" },
-      ],
-      [
-        { t: "  ", c: "tok-plain" },
-        { t: "gap", c: "tok-prop" },
-        { t: ": ", c: "tok-op" },
-        { t: "0.5rem", c: "tok-num" },
-        { t: ";", c: "tok-op" },
-      ],
-      [{ t: "}", c: "tok-op" }],
-    ],
-  },
-};
-
-const FILE_ICONS: Record<string, string> = {
-  "App.jsx": "⚛",
-  "TodoItem.jsx": "⚛",
-  "styles.css": "#",
-};
-
-const AI_CHAT: Record<string, { role: "ai" | "user"; text: string }[]> = {
-  "App.jsx": [
-    {
-      role: "ai",
-      text: "Your useState setup looks perfect! Both todos and input are tracked.",
-    },
-    {
-      role: "user",
-      text: "I added the addTodo function, but I'm not sure about the spread syntax.",
-    },
-    {
-      role: "ai",
-      text: "Good question. [...todos, newItem] creates a brand new array. React needs a new reference to detect the change. What do you think would happen if you mutated the original array?",
-    },
-  ],
-  "TodoItem.jsx": [
-    { role: "ai", text: "Now let's build the component that renders each todo item." },
-    { role: "user", text: "Should it receive the whole todo object or just the text?" },
-    {
-      role: "ai",
-      text: "The whole object is better because then it can access the done property for the checkbox too. Think about what props you will need to pass down.",
-    },
-  ],
-  "styles.css": [
-    { role: "ai", text: "Looking good! Let's style the todo items now." },
-    { role: "user", text: "What's the best way to show a completed todo?" },
-    {
-      role: "ai",
-      text: "Classic approach: `text-decoration: line-through` when `done` is true. How would you conditionally apply that class in React?",
-    },
-  ],
-};
-
-/* ─── IDE Mockup ────────────────────────────────────────── */
-function IDEMockup() {
-  const [activeFile, setActiveFile] = useState("App.jsx");
-  const file = FILES[activeFile];
-  const chat = AI_CHAT[activeFile];
-
+/* ─── Product screenshot showcase ──────────────────────── */
+function ProductMockup() {
   return (
-    <div className="w-full rounded-xl overflow-hidden border border-white/[0.08] shadow-2xl shadow-black/60 font-mono text-xs bg-[#0d1117] flex flex-col select-none">
-      {/* Title bar */}
-      <div className="flex items-center justify-between px-3.5 py-2.5 bg-[#161b22] border-b border-white/[0.06] shrink-0">
-        <div className="flex items-center gap-2">
-          <div className="flex gap-1.5">
-            <div className="w-2.5 h-2.5 rounded-full bg-[#ff5f57]" />
-            <div className="w-2.5 h-2.5 rounded-full bg-[#febc2e]" />
-            <div className="w-2.5 h-2.5 rounded-full bg-[#28c840]" />
+    <div className="relative w-full select-none">
+
+      {/* ── Outer ambient glow ── */}
+      <div
+        className="absolute pointer-events-none"
+        style={{
+          inset: "-60px",
+          background:
+            "radial-gradient(ellipse 70% 55% at 55% 45%, rgba(59,130,246,0.14) 0%, rgba(168,85,247,0.07) 45%, transparent 75%)",
+          filter: "blur(8px)",
+        }}
+      />
+
+      {/* ── Main window: Roadmap screenshot ── */}
+      <div
+        className="relative rounded-2xl overflow-hidden"
+        style={{
+          border: "1px solid rgba(255,255,255,0.1)",
+          boxShadow:
+            "0 48px 120px rgba(0,0,0,0.85), 0 0 0 1px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.06)",
+        }}
+      >
+        {/* Browser chrome */}
+        <div
+          className="flex items-center gap-3 px-4 py-3 border-b border-white/[0.07]"
+          style={{ background: "rgba(8,10,20,0.98)" }}
+        >
+          <div className="flex gap-1.5 shrink-0">
+            <span className="w-3 h-3 rounded-full bg-[#ff5f57]" />
+            <span className="w-3 h-3 rounded-full bg-[#febc2e]" />
+            <span className="w-3 h-3 rounded-full bg-[#28c840]" />
           </div>
-          <span className="ml-1.5 text-slate-500 text-[11px]">
-            mentivo-todo / Mentivo IDE
-          </span>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1 bg-[#22c55e]/10 border border-[#22c55e]/25 rounded px-2 py-0.5">
-            <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-            <span className="text-green-400 text-[10px] font-medium">No errors</span>
-          </div>
-          <svg
-            className="w-3.5 h-3.5 text-slate-600"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+          <div
+            className="flex items-center gap-2 flex-1 max-w-sm mx-4 rounded-lg px-3 py-1.5"
+            style={{
+              background: "rgba(255,255,255,0.04)",
+              border: "1px solid rgba(255,255,255,0.07)",
+            }}
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M4 6h16M4 12h16M4 18h7"
-            />
+            <svg className="w-3 h-3 text-slate-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+            <span className="text-[11px] text-slate-500 truncate">mentivo.app/dashboard/project/roadmap</span>
+          </div>
+          <div className="flex items-center gap-1.5 ml-auto shrink-0">
+            <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
+            <span className="text-[11px] text-slate-500 hidden sm:inline">Your personalized roadmap</span>
+          </div>
+        </div>
+
+        {/* Roadmap screenshot — clipped to the most impressive top section */}
+        <div className="relative overflow-hidden" style={{ maxHeight: 500 }}>
+          <Image
+            src="/screenshots/roadmap.png"
+            alt="Mentivo personalized learning roadmap"
+            width={600}
+            height={1800}
+            className="w-full"
+            style={{ objectFit: "cover", objectPosition: "top" }}
+            priority
+          />
+          {/* Bottom fade so it melts into the dark background */}
+          <div
+            className="absolute bottom-0 inset-x-0 h-28 pointer-events-none"
+            style={{
+              background:
+                "linear-gradient(to top, #07080f 0%, rgba(7,8,15,0.85) 40%, transparent 100%)",
+            }}
+          />
+        </div>
+      </div>
+
+      {/* ── Floating card: Dashboard idea input ── */}
+      <div
+        className="absolute -bottom-5 -left-6 w-72 rounded-2xl overflow-hidden"
+        style={{
+          background: "rgba(8,10,20,0.97)",
+          border: "1px solid rgba(255,255,255,0.1)",
+          boxShadow: "0 24px 64px rgba(0,0,0,0.75), 0 0 0 1px rgba(255,255,255,0.04)",
+        }}
+      >
+        {/* Mini header */}
+        <div className="flex items-center gap-2 px-3 py-2.5 border-b border-white/[0.06]">
+          <div className="w-5 h-5 rounded-md bg-blue-600/80 flex items-center justify-center shrink-0">
+            <svg className="w-2.5 h-2.5 text-white" viewBox="0 0 16 16" fill="none" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                d="M8 2a4 4 0 014 4c0 1.5-.8 2.8-2 3.5V11H6V9.5A4 4 0 018 2zm-1 9h2" />
+            </svg>
+          </div>
+          <span className="text-[12px] font-semibold text-white">Mentivo</span>
+          <div className="ml-auto flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+            <span className="text-[10px] text-green-400 font-medium">Ready to build</span>
+          </div>
+        </div>
+        {/* Dashboard screenshot */}
+        <div className="relative overflow-hidden" style={{ maxHeight: 140 }}>
+          <Image
+            src="/screenshots/dashboard.png"
+            alt="Mentivo dashboard"
+            width={1024}
+            height={845}
+            className="w-full"
+            style={{ objectFit: "cover", objectPosition: "top" }}
+          />
+          <div
+            className="absolute bottom-0 inset-x-0 h-10 pointer-events-none"
+            style={{
+              background: "linear-gradient(to top, rgba(8,10,20,0.95), transparent)",
+            }}
+          />
+        </div>
+      </div>
+
+      {/* ── Floating card: Learning session ── */}
+      <div
+        className="absolute -top-4 -right-6 w-60 rounded-2xl overflow-hidden hidden xl:block"
+        style={{
+          background: "rgba(8,10,20,0.97)",
+          border: "1px solid rgba(255,255,255,0.09)",
+          boxShadow: "0 20px 56px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.04)",
+          transform: "rotate(1.5deg)",
+        }}
+      >
+        <div className="flex items-center gap-2 px-3 py-2 border-b border-white/[0.06]">
+          <div className="flex gap-1">
+            <span className="w-2 h-2 rounded-full bg-[#ff5f57]" />
+            <span className="w-2 h-2 rounded-full bg-[#febc2e]" />
+            <span className="w-2 h-2 rounded-full bg-[#28c840]" />
+          </div>
+          <span className="text-[10px] text-slate-500 ml-1 truncate">Milestone 2 · Displaying Expenses</span>
+        </div>
+        <div className="relative overflow-hidden" style={{ maxHeight: 130 }}>
+          <Image
+            src="/screenshots/learning page.png"
+            alt="Mentivo learning session"
+            width={1024}
+            height={516}
+            className="w-full"
+            style={{ objectFit: "cover", objectPosition: "top" }}
+          />
+          <div
+            className="absolute bottom-0 inset-x-0 h-10 pointer-events-none"
+            style={{
+              background: "linear-gradient(to top, rgba(8,10,20,0.95), transparent)",
+            }}
+          />
+        </div>
+        {/* "In progress" badge */}
+        <div className="flex items-center gap-2 px-3 py-2.5">
+          <span
+            className="inline-flex items-center gap-1.5 text-[10px] font-semibold rounded-full px-2.5 py-1"
+            style={{
+              color: "#fb923c",
+              background: "rgba(249,115,22,0.1)",
+              border: "1px solid rgba(249,115,22,0.25)",
+            }}
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse" />
+            In Progress
+          </span>
+          <span className="text-[10px] text-slate-500 ml-auto">0 / 3 tasks</span>
+        </div>
+      </div>
+
+      {/* ── Floating stat chip: roadmap created ── */}
+      <div
+        className="absolute right-4 -bottom-8 rounded-xl px-4 py-3 flex items-center gap-3"
+        style={{
+          background: "rgba(8,10,20,0.97)",
+          border: "1px solid rgba(34,197,94,0.25)",
+          boxShadow: "0 16px 40px rgba(0,0,0,0.6), 0 0 20px rgba(34,197,94,0.06)",
+        }}
+      >
+        <div
+          className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+          style={{
+            background: "rgba(34,197,94,0.12)",
+            border: "1px solid rgba(34,197,94,0.3)",
+          }}
+        >
+          <svg className="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
           </svg>
         </div>
-      </div>
-
-      {/* Tab bar */}
-      <div className="flex items-end bg-[#0d1117] border-b border-white/[0.06] overflow-x-auto shrink-0">
-        {Object.keys(FILES).map((fname) => (
-          <button
-            key={fname}
-            onClick={() => setActiveFile(fname)}
-            className={`flex items-center gap-1.5 px-4 py-2.5 text-[11px] border-r border-white/[0.04] shrink-0 transition-all ${
-              activeFile === fname
-                ? "bg-[#0d1117] text-slate-200 border-t-2 border-t-blue-400 pt-[9px]"
-                : "bg-[#161b22] text-slate-500 hover:text-slate-300 hover:bg-[#1c2128] border-t-2 border-t-transparent"
-            }`}
-          >
-            <span className="text-[10px] opacity-60">{FILE_ICONS[fname]}</span>
-            {fname}
-            {activeFile === fname && (
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-400 ml-0.5 opacity-60" />
-            )}
-          </button>
-        ))}
-      </div>
-
-      {/* Main panels */}
-      <div className="flex flex-1 min-h-0" style={{ height: "360px" }}>
-        {/* File explorer */}
-        <div className="w-[130px] shrink-0 bg-[#0d1117] border-r border-white/[0.05] overflow-y-auto">
-          <div className="px-2 pt-3 pb-1">
-            <p className="text-[9px] font-semibold text-slate-600 tracking-widest uppercase mb-2 px-1">
-              Explorer
-            </p>
-            {/* Root folder */}
-            <div className="mb-1">
-              <div className="flex items-center gap-1 px-1 py-0.5 text-slate-400 text-[10px]">
-                <svg className="w-2.5 h-2.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                  <path
-                    fillRule="evenodd"
-                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                <svg className="w-3 h-3 text-blue-400 shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" />
-                </svg>
-                <span>src</span>
-              </div>
-              <div className="ml-3 space-y-0.5">
-                {Object.keys(FILES).map((fname) => (
-                  <button
-                    key={fname}
-                    onClick={() => setActiveFile(fname)}
-                    className={`w-full flex items-center gap-1.5 px-1 py-0.5 rounded text-[10px] transition-colors ${
-                      activeFile === fname
-                        ? "text-blue-400 bg-blue-500/10"
-                        : "text-slate-500 hover:text-slate-300"
-                    }`}
-                  >
-                    <span className="text-[9px] opacity-50">
-                      {FILE_ICONS[fname]}
-                    </span>
-                    <span className="truncate">{fname}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-            {/* Public folder */}
-            <div>
-              <div className="flex items-center gap-1 px-1 py-0.5 text-slate-500 text-[10px]">
-                <svg className="w-2.5 h-2.5 shrink-0 opacity-50 -rotate-90" fill="currentColor" viewBox="0 0 20 20">
-                  <path
-                    fillRule="evenodd"
-                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                <svg className="w-3 h-3 text-slate-600 shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" />
-                </svg>
-                <span>public</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Code editor */}
-        <div className="flex-1 overflow-auto bg-[#0d1117] min-w-0">
-          <div className="p-3 space-y-[2px]">
-            {file.lines.map((line, lineIdx) => (
-              <div
-                key={lineIdx}
-                className={`flex items-start gap-3 rounded px-1 ${
-                  lineIdx + 1 === file.cursorLine
-                    ? "bg-white/[0.025]"
-                    : "hover:bg-white/[0.015]"
-                }`}
-              >
-                <span className="text-slate-700 w-5 text-right shrink-0 leading-5 text-[11px]">
-                  {lineIdx + 1}
-                </span>
-                <span className="leading-5 whitespace-pre">
-                  {line.length === 0 ? (
-                    <>&nbsp;</>
-                  ) : (
-                    line.map((tok, ti) => (
-                      <span key={ti} className={tok.c}>
-                        {tok.t}
-                      </span>
-                    ))
-                  )}
-                  {lineIdx + 1 === file.cursorLine && (
-                    <span className="ide-cursor" />
-                  )}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* AI mentor panel */}
-        <div className="w-[210px] shrink-0 bg-[#0c1117] border-l border-white/[0.06] flex flex-col">
-          {/* Panel header */}
-          <div className="flex items-center gap-2 px-3 py-2.5 border-b border-white/[0.06] bg-[#0d1420]">
-            <div className="w-5 h-5 rounded-[5px] bg-blue-500 flex items-center justify-center">
-              <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-              </svg>
-            </div>
-            <span className="text-slate-300 text-[11px] font-semibold">
-              Mentivo
-            </span>
-            <div className="ml-auto flex items-center gap-1">
-              <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-              <span className="text-green-400 text-[9px]">live</span>
-            </div>
-          </div>
-
-          {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-2.5 space-y-2.5">
-            {chat.map((msg, i) => (
-              <div key={i} className={`flex gap-1.5 ${msg.role === "user" ? "flex-row-reverse" : ""}`}>
-                <div
-                  className={`w-4 h-4 rounded-full shrink-0 flex items-center justify-center text-[8px] font-bold mt-0.5 ${
-                    msg.role === "ai"
-                      ? "bg-blue-500 text-white"
-                      : "bg-slate-700 text-slate-300"
-                  }`}
-                >
-                  {msg.role === "ai" ? "M" : "Y"}
-                </div>
-                <div
-                  className={`text-[10px] leading-[1.5] rounded-lg px-2 py-1.5 max-w-[155px] ${
-                    msg.role === "ai"
-                      ? "bg-[#161f2e] text-slate-300 rounded-tl-sm border border-white/[0.06]"
-                      : "bg-blue-500/15 text-blue-200 rounded-tr-sm border border-blue-500/20"
-                  }`}
-                >
-                  {msg.text}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Input */}
-          <div className="p-2 border-t border-white/[0.06]">
-            <div className="flex items-center gap-1.5 bg-white/[0.04] border border-white/[0.07] rounded-lg px-2 py-1.5">
-              <span className="text-slate-600 text-[10px] flex-1">
-                Ask Mentivo...
-              </span>
-              <button className="w-5 h-5 rounded bg-blue-500 flex items-center justify-center">
-                <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                </svg>
-              </button>
-            </div>
-          </div>
+        <div>
+          <p className="text-[12px] font-bold text-white leading-none mb-0.5">Roadmap created</p>
+          <p className="text-[11px] text-slate-500">7 milestones · Beginner level</p>
         </div>
       </div>
 
-      {/* Status bar */}
-      <div className="flex items-center justify-between px-3 py-1 bg-blue-600 text-white/75 text-[10px] shrink-0">
-        <div className="flex items-center gap-3">
-          <span className="flex items-center gap-1">
-            <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-            </svg>
-            main
-          </span>
-          <span>React 18</span>
-        </div>
-        <div className="flex items-center gap-3">
-          <span>{activeFile}</span>
-          <span>Ln {file.cursorLine}, Col 1</span>
-          <span>UTF-8</span>
-        </div>
-      </div>
     </div>
   );
 }
@@ -721,18 +371,9 @@ export default function HeroSection() {
             </div>
           </div>
 
-          {/* ── Right: IDE ── */}
+          {/* ── Right: Product mockup ── */}
           <div className="hero-ide w-full">
-            <IDEMockup />
-            {/* Floating hint */}
-            <div className="mt-3 flex items-center justify-center gap-2">
-              <svg className="w-3.5 h-3.5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5" />
-              </svg>
-              <p className="text-slate-600 text-xs">
-                Click the tabs to explore the project files
-              </p>
-            </div>
+            <ProductMockup />
           </div>
         </div>
       </div>

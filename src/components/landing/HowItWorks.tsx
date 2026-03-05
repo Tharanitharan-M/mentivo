@@ -3,8 +3,66 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import Image from "next/image";
 
 gsap.registerPlugin(ScrollTrigger);
+
+/* ─── Shared screenshot frame ───────────────────────────── */
+function ScreenFrame({
+  src,
+  alt,
+  label,
+  width,
+  height,
+  maxH = 260,
+}: {
+  src: string;
+  alt: string;
+  label: string;
+  width: number;
+  height: number;
+  maxH?: number;
+}) {
+  return (
+    <div
+      className="rounded-xl overflow-hidden w-full"
+      style={{
+        border: "1px solid rgba(255,255,255,0.09)",
+        boxShadow: "0 16px 48px rgba(0,0,0,0.6)",
+      }}
+    >
+      {/* Mini chrome */}
+      <div
+        className="flex items-center gap-2 px-3 py-2 border-b border-white/[0.07]"
+        style={{ background: "rgba(8,10,20,0.98)" }}
+      >
+        <div className="flex gap-1 shrink-0">
+          <span className="w-2 h-2 rounded-full bg-[#ff5f57]" />
+          <span className="w-2 h-2 rounded-full bg-[#febc2e]" />
+          <span className="w-2 h-2 rounded-full bg-[#28c840]" />
+        </div>
+        <span className="text-[10px] text-slate-500 truncate ml-1">{label}</span>
+      </div>
+      {/* Screenshot */}
+      <div className="relative overflow-hidden" style={{ maxHeight: maxH }}>
+        <Image
+          src={src}
+          alt={alt}
+          width={width}
+          height={height}
+          className="w-full"
+          style={{ objectFit: "cover", objectPosition: "top" }}
+        />
+        <div
+          className="absolute bottom-0 inset-x-0 h-12 pointer-events-none"
+          style={{
+            background: "linear-gradient(to top, rgba(8,10,20,0.9), transparent)",
+          }}
+        />
+      </div>
+    </div>
+  );
+}
 
 /* ─── Step data ─────────────────────────────────────────── */
 const STEPS = [
@@ -15,30 +73,17 @@ const STEPS = [
     accentBorder: "rgba(59,130,246,0.25)",
     tag: "Step 1",
     title: "Describe what you want to build",
-    body: "Open Mentivo and describe your idea in plain English. It asks a few questions to understand what you want and, if the scope is too big, it suggests a focused version you can actually finish.",
+    body: "Open Mentivo and describe your idea in plain English. It asks a few focused questions to understand exactly what you want, then tailors everything around your specific project — not a generic template.",
     callout: "Your idea, not a pre-made template.",
     preview: (
-      <div className="space-y-2.5 text-xs font-mono bg-[#0d1117] rounded-xl border border-white/[0.06] p-4">
-        <div className="flex gap-2.5">
-          <span className="text-orange-400 font-bold shrink-0 w-6">You</span>
-          <span className="text-slate-400">&ldquo;I want to build a habit tracker app&rdquo;</span>
-        </div>
-        <div className="flex gap-2.5">
-          <span className="text-blue-400 font-bold shrink-0 w-6">M</span>
-          <span className="text-slate-300">Should it track daily or weekly habits? Do you want data to persist across sessions?</span>
-        </div>
-        <div className="flex gap-2.5">
-          <span className="text-orange-400 font-bold shrink-0 w-6">You</span>
-          <span className="text-slate-400">Daily habits, yes I want them saved.</span>
-        </div>
-        <div className="flex gap-2.5">
-          <span className="text-blue-400 font-bold shrink-0 w-6">M</span>
-          <span className="text-slate-300">
-            Perfect. Here&apos;s your{" "}
-            <span className="text-blue-400 font-semibold">5-milestone MVP plan</span>. Ready to start?
-          </span>
-        </div>
-      </div>
+      <ScreenFrame
+        src="/screenshots/dashboard.png"
+        alt="Mentivo dashboard – describe your idea"
+        label="mentivo.app/dashboard"
+        width={1024}
+        height={845}
+        maxH={280}
+      />
     ),
   },
   {
@@ -47,51 +92,18 @@ const STEPS = [
     accentMuted: "rgba(249,115,22,0.1)",
     accentBorder: "rgba(249,115,22,0.25)",
     tag: "Step 2",
-    title: "Get a path matched to your level",
-    body: "Mentivo starts with a short conversational check. No tests, just a few questions. It figures out what you already know and builds a sequence of milestones that teaches exactly what you need in the right order.",
-    callout: "Complete beginner? It starts with what HTML even is.",
+    title: "Get a personalized learning roadmap",
+    body: "After a quick 6-question skill check, Mentivo generates a roadmap of 5–8 milestones perfectly matched to your current level. Complete beginner? It starts with what HTML even is. Already know the basics? It skips ahead.",
+    callout: "7 milestones. 17–24 hours. Tailored to you.",
     preview: (
-      <div className="space-y-2.5">
-        {[
-          { label: "HTML structure", state: "done" },
-          { label: "CSS styling", state: "done" },
-          { label: "JavaScript basics", state: "active" },
-          { label: "React components", state: "todo" },
-          { label: "Persistent storage", state: "todo" },
-        ].map((item, i) => (
-          <div key={i} className="flex items-center gap-3">
-            <div
-              className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 transition-all ${
-                item.state === "done"
-                  ? "bg-green-500/15 border border-green-500/35 text-green-400"
-                  : item.state === "active"
-                  ? "bg-orange-500/15 border border-orange-500/40 text-orange-400"
-                  : "bg-white/4 border border-white/10 text-slate-600"
-              }`}
-            >
-              {item.state === "done" ? "✓" : i + 1}
-            </div>
-            <div className="flex items-center gap-2 flex-1">
-              <span
-                className={`text-xs font-medium ${
-                  item.state === "done"
-                    ? "text-slate-500 line-through"
-                    : item.state === "active"
-                    ? "text-white"
-                    : "text-slate-600"
-                }`}
-              >
-                {item.label}
-              </span>
-              {item.state === "active" && (
-                <span className="text-[9px] font-bold text-orange-400 bg-orange-500/10 border border-orange-500/20 rounded-full px-2 py-0.5 uppercase tracking-wider">
-                  up next
-                </span>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
+      <ScreenFrame
+        src="/screenshots/roadmap.png"
+        alt="Mentivo personalized learning roadmap"
+        label="mentivo.app/dashboard/project/roadmap"
+        width={600}
+        height={1800}
+        maxH={300}
+      />
     ),
   },
   {
@@ -100,51 +112,18 @@ const STEPS = [
     accentMuted: "rgba(34,197,94,0.08)",
     accentBorder: "rgba(34,197,94,0.22)",
     tag: "Step 3",
-    title: "Build with guidance. Every line is yours.",
-    body: "For each milestone, Mentivo explains the concept in plain English and then helps you write the code through questions rather than just handing you the answer. The built-in browser editor means there's nothing to install.",
+    title: "Build every line yourself, with guidance",
+    body: "For each milestone Mentivo explains the concept, then helps you write the code through questions — not by handing you the answer. The built-in editor runs live in the browser. No install, no setup, just build.",
     callout: "It won't move you forward until you genuinely get it.",
     preview: (
-      <div className="bg-[#0d1117] rounded-xl border border-white/[0.06] overflow-hidden text-xs font-mono">
-        <div className="flex items-center justify-between px-3 py-2 bg-[#161b22] border-b border-white/[0.05]">
-          <div className="flex gap-1.5">
-            <div className="w-2 h-2 rounded-full bg-[#ff5f57]" />
-            <div className="w-2 h-2 rounded-full bg-[#febc2e]" />
-            <div className="w-2 h-2 rounded-full bg-[#28c840]" />
-          </div>
-          <span className="text-slate-600 text-[10px]">App.jsx / Milestone 3</span>
-        </div>
-        <div className="p-3 space-y-0.5">
-          {[
-            [{ t: "import", c: "tok-kw" }, { t: " { useState } from ", c: "tok-op" }, { t: "'react'", c: "tok-str" }],
-            [],
-            [{ t: "export default ", c: "tok-kw" }, { t: "function", c: "tok-kw" }, { t: " App", c: "tok-fn" }, { t: "() {", c: "tok-op" }],
-            [{ t: "  ", c: "tok-plain" }, { t: "const", c: "tok-kw" }, { t: " [habits, setHabits] = ", c: "tok-op" }, { t: "useState", c: "tok-fn" }, { t: "([])", c: "tok-op" }],
-            [{ t: "  ", c: "tok-plain" }, { t: "// ← your code here", c: "tok-cmt" }],
-          ].map((line, li) => (
-            <div key={li} className="flex gap-2.5">
-              <span className="text-slate-700 w-3 text-right leading-5 text-[10px] shrink-0">{li + 1}</span>
-              <span className="leading-5">
-                {line.map((tok, ti) => (
-                  <span key={ti} className={tok.c}>{tok.t}</span>
-                ))}
-                {li === 4 && <span className="ide-cursor" />}
-              </span>
-            </div>
-          ))}
-        </div>
-        <div className="border-t border-white/[0.05] px-3 py-2">
-          <div className="flex gap-2 items-start">
-            <div className="w-4 h-4 rounded-[4px] bg-green-500/15 border border-green-500/25 flex items-center justify-center text-green-400 shrink-0 mt-0.5">
-              <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3" />
-              </svg>
-            </div>
-            <p className="text-[10px] text-slate-400 leading-relaxed">
-              Now that you have <span className="text-green-400">useState</span>, how would you add a new habit to that array?
-            </p>
-          </div>
-        </div>
-      </div>
+      <ScreenFrame
+        src="/screenshots/learning page.png"
+        alt="Mentivo milestone learning session with code editor"
+        label="mentivo.app/dashboard/project/milestone/2"
+        width={1024}
+        height={516}
+        maxH={260}
+      />
     ),
   },
   {
@@ -153,37 +132,66 @@ const STEPS = [
     accentMuted: "rgba(168,85,247,0.1)",
     accentBorder: "rgba(168,85,247,0.25)",
     tag: "Step 4",
-    title: "Ship a project you can explain",
-    body: "When all milestones are complete, you have a working, deployed app. And unlike a tutorial you followed along with, you understand every line because you wrote every line yourself.",
-    callout: "One-click deploy. Share the link. Show your work.",
+    title: "Ship a project you can fully explain",
+    body: "Once all milestones are done, you have a working, deployed app. Unlike a tutorial you copy-pasted, you understand every decision because you made every decision. You wrote every line.",
+    callout: "One project. Every line yours. Zero confusion.",
     preview: (
       <div className="space-y-3">
-        <div className="flex items-center gap-3 bg-green-500/6 border border-green-500/20 rounded-xl px-4 py-3">
-          <div className="w-9 h-9 rounded-xl bg-green-500/12 border border-green-500/25 flex items-center justify-center text-green-400 shrink-0">
-            <svg className="w-4.5 h-4.5 w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+        <div
+          className="flex items-center gap-3 rounded-xl px-4 py-3.5"
+          style={{
+            background: "rgba(34,197,94,0.07)",
+            border: "1px solid rgba(34,197,94,0.22)",
+          }}
+        >
+          <div
+            className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+            style={{
+              background: "rgba(34,197,94,0.12)",
+              border: "1px solid rgba(34,197,94,0.3)",
+            }}
+          >
+            <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
             </svg>
           </div>
           <div>
-            <p className="text-white text-xs font-bold">Project complete!</p>
-            <p className="text-green-400 text-[11px] font-mono">habit-tracker.mentivo.app/alex</p>
+            <p className="text-white text-sm font-bold leading-none mb-1">All milestones complete!</p>
+            <p className="text-green-400 text-[11px] font-mono">expense-tracker.mentivo.app/alex</p>
           </div>
         </div>
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-3 gap-2.5">
           {[
-            { val: "5/5", label: "Milestones" },
-            { val: "14", label: "Concepts" },
-            { val: "203", label: "Lines written" },
+            { val: "7 / 7", label: "Milestones" },
+            { val: "18", label: "Concepts learned" },
+            { val: "340", label: "Lines written" },
           ].map((s, i) => (
-            <div key={i} className="bg-white/[0.03] border border-white/[0.06] rounded-lg px-3 py-2.5 text-center">
+            <div
+              key={i}
+              className="rounded-xl px-3 py-3 text-center"
+              style={{
+                background: "rgba(255,255,255,0.03)",
+                border: "1px solid rgba(255,255,255,0.07)",
+              }}
+            >
               <p className="text-white text-sm font-black">{s.val}</p>
               <p className="text-slate-500 text-[10px] mt-0.5">{s.label}</p>
             </div>
           ))}
         </div>
-        <p className="text-slate-500 text-[11px] text-center italic">
-          &ldquo;I built a real app. And I can explain every line of it.&rdquo;
-        </p>
+        <div
+          className="rounded-xl px-4 py-3"
+          style={{
+            background: "rgba(168,85,247,0.07)",
+            border: "1px solid rgba(168,85,247,0.2)",
+          }}
+        >
+          <p className="text-violet-300 text-xs font-semibold mb-1">What a learner said:</p>
+          <p className="text-slate-400 text-[12px] leading-relaxed italic">
+            &ldquo;I built a real app and I can explain every line of it. That&apos;s never happened before.&rdquo;
+          </p>
+          <p className="text-slate-600 text-[11px] mt-2">— Alex, Built: Expense Tracker</p>
+        </div>
       </div>
     ),
   },
@@ -192,7 +200,7 @@ const STEPS = [
 /* ─── Component ─────────────────────────────────────────── */
 export default function HowItWorks() {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const lineRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
   const stepRefs = useRef<(HTMLDivElement | null)[]>([]);
   const numRefs = useRef<(HTMLDivElement | null)[]>([]);
 
@@ -211,31 +219,13 @@ export default function HowItWorks() {
         },
       });
 
-      /* ── Timeline line draws down with scrub ── */
-      if (lineRef.current) {
-        gsap.fromTo(
-          lineRef.current,
-          { scaleY: 0 },
-          {
-            scaleY: 1,
-            ease: "none",
-            transformOrigin: "top center",
-            scrollTrigger: {
-              trigger: ".hiw-steps-container",
-              start: "top 70%",
-              end: "bottom 60%",
-              scrub: 0.6,
-            },
-          }
-        );
-      }
-
-      /* ── Each step slides in ── */
+      /* ── Each step fades in ── */
       stepRefs.current.forEach((el, i) => {
         if (!el) return;
-        gsap.set(el, { opacity: 0, x: 60, y: 20 });
+        gsap.set(el, { opacity: 0, y: 40 });
         gsap.to(el, {
-          opacity: 1, x: 0, y: 0,
+          opacity: 1,
+          y: 0,
           duration: 0.85, ease: "power3.out",
           delay: i * 0.05,
           scrollTrigger: { trigger: el, start: "top bottom", once: true },
@@ -260,13 +250,34 @@ export default function HowItWorks() {
           y: -60,
           ease: "none",
           scrollTrigger: {
-            trigger: el,
-            start: "top bottom",
-            end: "bottom top",
-            scrub: 1.2,
+              trigger: el,
+              start: "top bottom",
+              end: "bottom top",
+              scrub: 1.2,
           },
         });
       });
+
+      /* ── Horizontal scroll experience on desktop ── */
+      if (typeof window !== "undefined" && window.innerWidth >= 1024) {
+        const track = trackRef.current;
+        const steps = gsap.utils.toArray<HTMLElement>(".hiw-step");
+        if (track && steps.length > 1 && sectionRef.current) {
+          const total = steps.length;
+          gsap.to(track, {
+            xPercent: -100 * (total - 1),
+            ease: "none",
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: "top top",
+              end: () => `+=${window.innerWidth * (total - 0.5)}`,
+              scrub: 1.1,
+              pin: true,
+              snap: 1 / (total - 1),
+            },
+          });
+        }
+      }
     }, sectionRef);
 
     return () => ctx.revert();
@@ -314,43 +325,16 @@ export default function HowItWorks() {
 
         {/* ── Steps ── */}
         <div className="hiw-steps-container relative">
-          {/* Connecting timeline line */}
-          <div className="absolute left-[27px] top-8 bottom-8 w-px bg-white/[0.05] hidden lg:block">
-            <div
-              ref={lineRef}
-              className="w-full h-full"
-              style={{
-                background:
-                  "linear-gradient(to bottom, #3b82f6, #f97316, #22c55e, #a855f7)",
-              }}
-            />
-          </div>
-
-          <div className="space-y-7">
+          <div
+            ref={trackRef}
+            className="hiw-track flex gap-6 lg:gap-10 overflow-x-auto lg:overflow-visible snap-x snap-mandatory lg:snap-none pb-4"
+          >
             {STEPS.map((step, i) => (
               <div
                 key={i}
                 ref={(el) => { stepRefs.current[i] = el; }}
-                className="relative grid lg:grid-cols-[56px_1fr] gap-5 lg:gap-8 items-start"
+                className="hiw-step relative flex-shrink-0 w-[90vw] md:w-[70vw] lg:w-[60vw] xl:w-[52vw] snap-center"
               >
-                {/* ── Number badge (left column on desktop) ── */}
-                <div
-                  ref={(el) => { numRefs.current[i] = el; }}
-                  className="hidden lg:flex flex-col items-center gap-1 pt-1"
-                >
-                  <div
-                    className="w-[54px] h-[54px] rounded-2xl flex items-center justify-center font-black text-[13px] tracking-wider z-10 relative shadow-lg"
-                    style={{
-                      background: step.accentMuted,
-                      border: `1px solid ${step.accentBorder}`,
-                      color: step.accent,
-                      boxShadow: `0 0 20px ${step.accentMuted}`,
-                    }}
-                  >
-                    {step.num}
-                  </div>
-                </div>
-
                 {/* ── Step card ── */}
                 <div
                   className="rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1 group"
@@ -362,9 +346,10 @@ export default function HowItWorks() {
                   <div className="grid md:grid-cols-2 gap-0">
                     {/* Left: copy */}
                     <div className="p-7 lg:p-8 flex flex-col gap-5 border-b md:border-b-0 md:border-r border-white/[0.05]">
-                      {/* Mobile step badge */}
-                      <div className="flex items-center gap-3 lg:hidden">
+                      {/* Step badge */}
+                      <div className="flex items-center gap-3">
                         <div
+                          ref={(el) => { numRefs.current[i] = el; }}
                           className="w-9 h-9 rounded-xl flex items-center justify-center font-black text-[11px]"
                           style={{
                             background: step.accentMuted,
@@ -381,14 +366,6 @@ export default function HowItWorks() {
                           {step.tag}
                         </span>
                       </div>
-
-                      {/* Desktop step tag */}
-                      <span
-                        className="hidden lg:inline-flex text-[11px] font-bold tracking-widest uppercase w-fit"
-                        style={{ color: step.accent }}
-                      >
-                        {step.tag}
-                      </span>
 
                       {/* Big background number (decorative) */}
                       <div className="relative">
