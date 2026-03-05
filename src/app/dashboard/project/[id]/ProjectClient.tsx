@@ -189,6 +189,7 @@ export default function ProjectClient({
     return (
       <QuizResults
         result={quizResult}
+        projectId={project.id}
         projectIdea={project.idea}
         existingQuiz={existingQuiz}
         userName={userName}

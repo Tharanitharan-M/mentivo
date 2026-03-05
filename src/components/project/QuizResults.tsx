@@ -2,6 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 interface QuizResult {
   level: string;
@@ -15,6 +17,7 @@ interface QuizResult {
 
 interface Props {
   result: QuizResult | null;
+  projectId: string;
   projectIdea: string;
   existingQuiz: {
     questions: unknown[];
@@ -46,7 +49,10 @@ const LEVEL_CONFIG: Record<string, { gradient: string; glow: string; border: str
   },
 };
 
-export default function QuizResults({ result, projectIdea, existingQuiz, userName }: Props) {
+export default function QuizResults({ result, projectId, projectIdea, existingQuiz, userName }: Props) {
+  const router = useRouter();
+  const [isGenerating, setIsGenerating] = useState(false);
+
   const level = result?.level ?? existingQuiz?.level ?? "beginner";
   const levelLabel = result?.levelLabel ?? "Explorer";
   const summary = result?.summary ?? "Your personalized learning path is ready.";
@@ -56,6 +62,20 @@ export default function QuizResults({ result, projectIdea, existingQuiz, userNam
   const nextStep = result?.nextStep ?? "Let's start your learning journey.";
 
   const cfg = LEVEL_CONFIG[level] ?? LEVEL_CONFIG.beginner;
+
+  const handleStartLearning = async () => {
+    setIsGenerating(true);
+    try {
+      await fetch("/api/roadmap/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ projectId }),
+      });
+      router.push(`/dashboard/project/${projectId}/roadmap`);
+    } catch {
+      setIsGenerating(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#07080f] flex flex-col">
@@ -92,7 +112,6 @@ export default function QuizResults({ result, projectIdea, existingQuiz, userNam
         <div className="w-full max-w-xl space-y-5">
           {/* Level reveal card */}
           <div className={`rounded-2xl border ${cfg.border} bg-white/[0.02] p-7 text-center relative overflow-hidden`}>
-            {/* Subtle gradient glow behind */}
             <div
               className="absolute inset-0 opacity-[0.04] pointer-events-none"
               style={{ background: `radial-gradient(ellipse at top, ${cfg.glow}, transparent 70%)` }}
@@ -106,9 +125,7 @@ export default function QuizResults({ result, projectIdea, existingQuiz, userNam
             </div>
 
             <div className="mb-4">
-              <span
-                className={`text-4xl sm:text-5xl font-black tracking-tight bg-gradient-to-r ${cfg.gradient} bg-clip-text text-transparent`}
-              >
+              <span className={`text-4xl sm:text-5xl font-black tracking-tight bg-gradient-to-r ${cfg.gradient} bg-clip-text text-transparent`}>
                 {levelLabel}
               </span>
             </div>
@@ -117,9 +134,7 @@ export default function QuizResults({ result, projectIdea, existingQuiz, userNam
               {level} level
             </span>
 
-            <p className="text-slate-300 text-sm leading-relaxed max-w-sm mx-auto">
-              {summary}
-            </p>
+            <p className="text-slate-300 text-sm leading-relaxed max-w-sm mx-auto">{summary}</p>
           </div>
 
           {/* Strengths + Focus areas */}
@@ -144,7 +159,6 @@ export default function QuizResults({ result, projectIdea, existingQuiz, userNam
                 </ul>
               </div>
             )}
-
             {focusAreas.length > 0 && (
               <div className="rounded-xl border border-white/[0.07] bg-white/[0.02] p-4">
                 <div className="flex items-center gap-2 mb-3">
@@ -167,7 +181,7 @@ export default function QuizResults({ result, projectIdea, existingQuiz, userNam
             )}
           </div>
 
-          {/* Project idea reminder */}
+          {/* Project idea */}
           <div className="rounded-xl border border-white/[0.06] bg-white/[0.015] px-4 py-3 flex items-start gap-3">
             <svg className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
@@ -178,13 +192,13 @@ export default function QuizResults({ result, projectIdea, existingQuiz, userNam
             </div>
           </div>
 
-          {/* Encouragement + Next step */}
+          {/* Encouragement */}
           <div className="rounded-xl border border-white/[0.07] bg-white/[0.02] px-5 py-4 text-center">
             <p className="text-white font-semibold text-sm mb-1">{encouragement}</p>
             <p className="text-slate-500 text-xs leading-relaxed">{nextStep}</p>
           </div>
 
-          {/* CTA */}
+          {/* CTAs */}
           <div className="flex flex-col sm:flex-row gap-3">
             <Link
               href="/dashboard"
@@ -193,15 +207,29 @@ export default function QuizResults({ result, projectIdea, existingQuiz, userNam
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
               </svg>
-              Back to Dashboard
+              Dashboard
             </Link>
             <button
-              className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r ${cfg.gradient} text-white text-sm font-semibold transition-all hover:opacity-90 active:scale-[0.98]`}
+              onClick={handleStartLearning}
+              disabled={isGenerating}
+              className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r ${cfg.gradient} text-white text-sm font-semibold transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed`}
             >
-              Start Learning
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-              </svg>
+              {isGenerating ? (
+                <>
+                  <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8h4z" />
+                  </svg>
+                  Building your roadmap...
+                </>
+              ) : (
+                <>
+                  See My Roadmap
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                </>
+              )}
             </button>
           </div>
         </div>
