@@ -128,10 +128,30 @@ const STEPS = [
   },
   {
     num: "04",
+    accent: "#f59e0b",
+    accentMuted: "rgba(245,158,11,0.1)",
+    accentBorder: "rgba(245,158,11,0.25)",
+    tag: "Step 4",
+    title: "Prove you understand before moving on",
+    body: "After every milestone Mentivo quizzes you on the exact concepts you just built — questions tailored to your project, not generic trivia. You can only advance once you genuinely understand the 'why' behind the code you wrote.",
+    callout: "No moving on until it actually clicks.",
+    preview: (
+      <ScreenFrame
+        src="/screenshots/quiz-after-milestone.png"
+        alt="Mentivo knowledge-check quiz after a milestone"
+        label="mentivo.app/dashboard/project/milestone/quiz"
+        width={1024}
+        height={600}
+        maxH={300}
+      />
+    ),
+  },
+  {
+    num: "05",
     accent: "#a855f7",
     accentMuted: "rgba(168,85,247,0.1)",
     accentBorder: "rgba(168,85,247,0.25)",
-    tag: "Step 4",
+    tag: "Step 5",
     title: "Ship a project you can fully explain",
     body: "Once all milestones are done, you have a working, deployed app. Unlike a tutorial you copy-pasted, you understand every decision because you made every decision. You wrote every line.",
     callout: "One project. Every line yours. Zero confusion.",
@@ -261,16 +281,24 @@ export default function HowItWorks() {
       /* ── Horizontal scroll experience on desktop ── */
       if (typeof window !== "undefined" && window.innerWidth >= 1024) {
         const track = trackRef.current;
-        const steps = gsap.utils.toArray<HTMLElement>(".hiw-step");
-        if (track && steps.length > 1 && sectionRef.current) {
-          const total = steps.length;
+        const stepEls = gsap.utils.toArray<HTMLElement>(".hiw-step");
+        if (track && stepEls.length > 1 && sectionRef.current) {
+          const total = stepEls.length;
+
+          /* Measure the real rendered gap between card 1 and card N directly
+             from the DOM — avoids any manual breakpoint math. */
+          const trackRect   = track.getBoundingClientRect();
+          const firstLeft   = stepEls[0].getBoundingClientRect().left  - trackRect.left;
+          const lastLeft    = stepEls[total - 1].getBoundingClientRect().left - trackRect.left;
+          const totalDist   = lastLeft - firstLeft;
+
           gsap.to(track, {
-            xPercent: -100 * (total - 1),
+            x: -totalDist,
             ease: "none",
             scrollTrigger: {
               trigger: sectionRef.current,
               start: "top top",
-              end: () => `+=${window.innerWidth * (total - 0.5)}`,
+              end: () => `+=${totalDist}`,
               scrub: 1.1,
               pin: true,
               snap: 1 / (total - 1),
@@ -314,7 +342,7 @@ export default function HowItWorks() {
                 backgroundClip: "text",
               }}
             >
-              four steps.
+              five steps.
             </span>
           </h2>
           <p className="text-slate-400 text-lg leading-relaxed">
