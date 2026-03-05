@@ -11,7 +11,8 @@ export async function POST(req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { milestoneId, code, tasks } = await req.json();
+  const body = await req.json();
+  const { milestoneId, completedIds: clientCompletedIds, code, tasks } = body;
 
   const milestone = await prisma.milestone.findUnique({
     where: { id: milestoneId },
@@ -21,6 +22,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
+  // Client ran automated tests and sent results — no AI, just persist
+  if (Array.isArray(clientCompletedIds)) {
+    await prisma.milestone.update({
+      where: { id: milestoneId },
+      data: { completedTaskIds: clientCompletedIds },
+    });
+    return NextResponse.json({ completedIds: clientCompletedIds });
+  }
+
+  // Backward compat: no test code (e.g. old milestones) — use AI to check
   if (!tasks || tasks.length === 0 || !code?.trim()) {
     return NextResponse.json({ completedIds: [] });
   }
@@ -43,7 +54,6 @@ Be fairly liberal — if they've made a genuine attempt at the task, count it co
 Only return IDs from this list: [${(tasks as Task[]).map((t) => t.id).join(", ")}]`,
   });
 
-  // Persist to DB
   await prisma.milestone.update({
     where: { id: milestoneId },
     data: { completedTaskIds: object.completedIds },

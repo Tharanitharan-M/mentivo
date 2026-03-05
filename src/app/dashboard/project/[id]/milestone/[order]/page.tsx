@@ -30,6 +30,14 @@ export default async function MilestonePage({ params }: PageProps) {
   const milestone = project.roadmap.milestones.find((m) => m.order === orderNum);
   if (!milestone) notFound();
 
+  // Enforce order: must complete previous milestone before opening this one
+  if (orderNum > 1) {
+    const prev = project.roadmap.milestones.find((m) => m.order === orderNum - 1);
+    if (prev && prev.status !== "COMPLETED") {
+      redirect(`/dashboard/project/${id}/milestone/${orderNum - 1}`);
+    }
+  }
+
   const allMilestones = project.roadmap.milestones;
   const nextMilestone = allMilestones.find((m) => m.order === orderNum + 1) ?? null;
   const prevMilestone = allMilestones.find((m) => m.order === orderNum - 1) ?? null;
@@ -68,6 +76,7 @@ export default async function MilestonePage({ params }: PageProps) {
         conceptContent: milestone.conceptContent,
         starterCode: milestone.starterCode,
         code: milestone.code,
+        files: milestone.files as Record<string, string> | null,
         tasks: milestone.tasks as { id: string; text: string; hint: string }[] | null,
         completedTaskIds: milestone.completedTaskIds,
       }}

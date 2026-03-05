@@ -16,7 +16,7 @@ const Editor = dynamic(() => import("@monaco-editor/react"), {
 });
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-interface Task { id: string; text: string; hint: string }
+interface Task { id: string; text: string; hint: string; test?: string }
 interface QuizQuestion {
   id: string; question: string;
   options: { id: string; text: string }[];
@@ -37,6 +37,7 @@ interface Props {
     description: string; estimatedTime: string; difficulty: string;
     tags: string[]; status: string;
     conceptContent: string | null; starterCode: string | null; code: string | null;
+    files: Record<string, string> | null;
     tasks: Task[] | null; completedTaskIds: string[];
   };
   totalMilestones: number;
@@ -79,6 +80,54 @@ function getMessageText(msg: UIMessage) {
     .filter((p) => p.type === "text")
     .map((p) => (p as { type: "text"; text: string }).text)
     .join("");
+}
+
+/** Build a single HTML string from multiple files for iframe preview */
+function buildPreviewHtml(files: Record<string, string>): string {
+  const html = files["index.html"] ?? DEFAULT_HTML;
+  const css = files["style.css"] ?? files["styles.css"] ?? "";
+  const js = files["script.js"] ?? files["main.js"] ?? "";
+  let out = html;
+  if (css.trim()) {
+    const styleTag = `<style>\n${css.trim()}\n</style>`;
+    if (out.includes("</head>")) out = out.replace("</head>", `${styleTag}\n</head>`);
+    else if (out.includes("<body>")) out = out.replace("<body>", `<head>${styleTag}</head>\n<body>`);
+    else out = styleTag + out;
+  }
+  if (js.trim()) {
+    const scriptTag = `<script>\n${js.trim()}\n</script>`;
+    if (out.includes("</body>")) out = out.replace("</body>", `${scriptTag}\n</body>`);
+    else out = out + scriptTag;
+  }
+  return out;
+}
+
+function languageForFilename(name: string): string {
+  if (name.endsWith(".css")) return "css";
+  if (name.endsWith(".js")) return "javascript";
+  return "html";
+}
+
+/** Build HTML for the test iframe: user's code + script that runs tests and postMessages result (avoids cross-origin access). */
+function buildTestSrcdoc(html: string, taskList: Task[]): string {
+  const tasksPayload = taskList.filter((t) => t.test?.trim()).map((t) => ({ id: t.id, test: t.test! }));
+  if (tasksPayload.length === 0) return html;
+  const script = `
+<script>
+window.__MENTIVO_TASKS__ = ${JSON.stringify(tasksPayload)};
+(function(){
+  var completedIds = [];
+  var arr = window.__MENTIVO_TASKS__ || [];
+  for (var i = 0; i < arr.length; i++) {
+    var t = arr[i];
+    try { if (eval(t.test)) completedIds.push(t.id); } catch(e) {}
+  }
+  try { window.parent.postMessage({ type: 'MENTIVO_TASK_RESULT', completedIds: completedIds }, '*'); } catch(e) {}
+})();
+</script>`;
+  if (html.includes("</body>")) return html.replace("</body>", script + "\n</body>");
+  if (html.includes("</html>")) return html.replace("</html>", script + "\n</html>");
+  return html + script;
 }
 
 // ─── DragHandle ───────────────────────────────────────────────────────────────
@@ -208,16 +257,26 @@ export default function WorkspaceClient({
     return () => { window.removeEventListener("mousemove", onMove); window.removeEventListener("mouseup", onUp); };
   }, []);
 
-  // ── Code + preview ─────────────────────────────────────────────────────────
-  const initialCode = milestone.code ?? milestone.starterCode ?? DEFAULT_HTML;
-  const [code, setCode] = useState(initialCode);
-  const [previewSrc, setPreviewSrc] = useState(initialCode);
+  // ── Files + preview ───────────────────────────────────────────────────────
+  const initialFiles: Record<string, string> = milestone.files ?? {
+    "index.html": milestone.code ?? milestone.starterCode ?? DEFAULT_HTML,
+  };
+  const [files, setFiles] = useState<Record<string, string>>(initialFiles);
+  const [activeFile, setActiveFile] = useState<string>(() => Object.keys(initialFiles)[0] ?? "index.html");
+  const [previewSrc, setPreviewSrc] = useState(() => buildPreviewHtml(initialFiles));
   const [previewKey, setPreviewKey] = useState(0);
   const [saveStatus, setSaveStatus] = useState<"saved" | "saving" | "unsaved">("saved");
-  const codeRef = useRef(code);
+  const filesRef = useRef(files);
+  filesRef.current = files;
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const previewTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const verifyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [newFileName, setNewFileName] = useState("");
+  const [showAddFile, setShowAddFile] = useState(false);
+  const [testSrcdoc, setTestSrcdoc] = useState<string | null>(null);
+  const testIframeRef = useRef<HTMLIFrameElement>(null);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
 
   // ── UI state ───────────────────────────────────────────────────────────────
   const [showLearn, setShowLearn] = useState(true);
@@ -238,7 +297,7 @@ export default function WorkspaceClient({
   const [completedTaskIds, setCompletedTaskIds] = useState<string[]>(milestone.completedTaskIds ?? []);
   const [isVerifying, setIsVerifying] = useState(false);
   const [isStarterLoading, setIsStarterLoading] = useState(!milestone.starterCode);
-  const lastVerifiedCode = useRef(initialCode);
+  const lastVerifiedCode = useRef<string>("");
 
   // Next is only enabled when EVERY task is explicitly checked off
   const allTasksDone = tasks.length > 0 && tasks.every((t) => completedTaskIds.includes(t.id));
@@ -263,55 +322,115 @@ export default function WorkspaceClient({
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ milestoneId: milestone.id }),
     })
-      .then((r) => r.json())
+      .then(async (r) => {
+        const text = await r.text();
+        if (!r.ok) return null;
+        if (!text.trim()) return null;
+        try {
+          return JSON.parse(text) as { files?: Record<string, string>; code?: string; tasks?: Task[] };
+        } catch {
+          return null;
+        }
+      })
       .then((d) => {
-        if (d.code && !milestone.code) {
-          setCode(d.code); codeRef.current = d.code;
-          setPreviewSrc(d.code); setPreviewKey((k) => k + 1);
+        if (!d) return;
+        const nextFiles = d.files ?? { "index.html": d.code ?? DEFAULT_HTML };
+        if (Object.keys(nextFiles).length > 0) {
+          setFiles(nextFiles);
+          filesRef.current = nextFiles;
+          if (!Object.prototype.hasOwnProperty.call(nextFiles, activeFile)) setActiveFile(Object.keys(nextFiles)[0] ?? "index.html");
+          setPreviewSrc(buildPreviewHtml(nextFiles));
+          setPreviewKey((k) => k + 1);
         }
         if (d.tasks) setTasks(d.tasks);
       })
       .finally(() => setIsStarterLoading(false));
   }, [milestone.id, milestone.starterCode, milestone.tasks, milestone.code]);
 
-  // ── Verify tasks ───────────────────────────────────────────────────────────
-  const verifyTasks = useCallback(async (codeToVerify: string) => {
+  const testHtmlRef = useRef<string>("");
+  const pendingVerifyRef = useRef<{ milestoneId: string } | null>(null);
+
+  const verifyTasks = useCallback((codeToVerify: string) => {
     if (tasks.length === 0 || isVerifying || codeToVerify === lastVerifiedCode.current) return;
+    const allHaveTests = tasks.every((t) => t.test?.trim());
+    if (allHaveTests) {
+      testHtmlRef.current = codeToVerify;
+      pendingVerifyRef.current = { milestoneId: milestone.id };
+      setTestSrcdoc(buildTestSrcdoc(codeToVerify, tasks));
+      setIsVerifying(true);
+      return;
+    }
     setIsVerifying(true);
-    try {
-      const res = await fetch("/api/milestone/verify-tasks", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ milestoneId: milestone.id, code: codeToVerify, tasks }),
-      });
-      const data = await res.json();
-      if (data.completedIds) {
-        setCompletedTaskIds(data.completedIds);
-        lastVerifiedCode.current = codeToVerify;
-      }
-    } finally { setIsVerifying(false); }
+    fetch("/api/milestone/verify-tasks", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ milestoneId: milestone.id, code: codeToVerify, tasks }),
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.completedIds) {
+          setCompletedTaskIds(data.completedIds);
+          lastVerifiedCode.current = codeToVerify;
+        }
+      })
+      .finally(() => setIsVerifying(false));
   }, [tasks, isVerifying, milestone.id]);
+
+  // Iframe runs injected script and posts result; we handle it here (no cross-origin access)
+  useEffect(() => {
+    const onMessage = (event: MessageEvent) => {
+      const data = event.data;
+      if (!data || data.type !== "MENTIVO_TASK_RESULT" || !Array.isArray(data.completedIds)) return;
+      const pending = pendingVerifyRef.current;
+      if (!pending) return;
+      const completedIds = data.completedIds as string[];
+      setCompletedTaskIds(completedIds);
+      lastVerifiedCode.current = testHtmlRef.current;
+      fetch("/api/milestone/verify-tasks", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ milestoneId: pending.milestoneId, completedIds }),
+      }).catch(() => {});
+      pendingVerifyRef.current = null;
+      setTestSrcdoc(null);
+      setIsVerifying(false);
+    };
+    window.addEventListener("message", onMessage);
+    return () => window.removeEventListener("message", onMessage);
+  }, []);
 
   // ── Code change handler ────────────────────────────────────────────────────
   const handleCodeChange = useCallback((value: string | undefined) => {
     const v = value ?? "";
-    setCode(v); codeRef.current = v; setSaveStatus("unsaved");
+    setFiles((prev) => {
+      const next = { ...prev, [activeFile]: v };
+      filesRef.current = next;
+      return next;
+    });
+    setSaveStatus("unsaved");
 
     if (previewTimer.current) clearTimeout(previewTimer.current);
-    previewTimer.current = setTimeout(() => { setPreviewSrc(v); setPreviewKey((k) => k + 1); }, 1000);
+    previewTimer.current = setTimeout(() => {
+      const next = { ...filesRef.current, [activeFile]: v };
+      setPreviewSrc(buildPreviewHtml(next));
+      setPreviewKey((k) => k + 1);
+    }, 1000);
 
     if (saveTimer.current) clearTimeout(saveTimer.current);
     setSaveStatus("saving");
     saveTimer.current = setTimeout(async () => {
+      const toSave = { ...filesRef.current, [activeFile]: v };
       await fetch("/api/milestone/save", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ milestoneId: milestone.id, code: v }),
+        body: JSON.stringify({ milestoneId: milestone.id, files: toSave }),
       });
       setSaveStatus("saved");
     }, 3000);
 
     if (verifyTimer.current) clearTimeout(verifyTimer.current);
-    verifyTimer.current = setTimeout(() => verifyTasks(v), 8000);
-  }, [milestone.id, verifyTasks]);
+    verifyTimer.current = setTimeout(() => {
+      const full = buildPreviewHtml({ ...filesRef.current, [activeFile]: v });
+      verifyTasks(full);
+    }, 8000);
+  }, [milestone.id, activeFile, verifyTasks]);
 
   // ── Chat ───────────────────────────────────────────────────────────────────
   const { messages: chatMessages, sendMessage, status: chatStatus } = useChat({
@@ -333,7 +452,7 @@ export default function WorkspaceClient({
     setIsGeneratingQuiz(true);
     await fetch("/api/milestone/save", {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ milestoneId: milestone.id, code: codeRef.current }),
+      body: JSON.stringify({ milestoneId: milestone.id, files: filesRef.current }),
     });
     const res = await fetch("/api/milestone/quiz-generate", {
       method: "POST", headers: { "Content-Type": "application/json" },
@@ -344,9 +463,13 @@ export default function WorkspaceClient({
     setIsGeneratingQuiz(false);
   };
 
-  // ── Navigate to next ───────────────────────────────────────────────────────
+  // ── Next: take quiz first if not completed, then go to next milestone ──────
   const handleNext = () => {
     if (!nextEnabled || !nextMilestone) return;
+    if (milestone.status !== "COMPLETED" && allTasksDone) {
+      handleStartQuiz();
+      return;
+    }
     router.push(`/dashboard/project/${project.id}/milestone/${nextMilestone.order}`);
   };
 
@@ -397,6 +520,69 @@ export default function WorkspaceClient({
       {isDragging && (
         <div className="fixed inset-0 z-[200]" style={{ cursor: dragCursor }} />
       )}
+      {/* Hidden iframe for automated task tests — loads learner code and runs test snippets */}
+      {testSrcdoc && (
+        <iframe
+          ref={testIframeRef}
+          srcDoc={testSrcdoc}
+          title="Task verification"
+          className="fixed opacity-0 pointer-events-none w-0 h-0"
+          sandbox="allow-scripts"
+        />
+      )}
+      {/* Reset milestone confirmation modal */}
+      {showResetConfirm && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <div className="bg-[#0d0f1a] border border-white/[0.1] rounded-2xl p-6 max-w-md w-full shadow-xl">
+            <h3 className="text-lg font-bold text-white mb-2">Reset this milestone?</h3>
+            <p className="text-slate-400 text-sm leading-relaxed mb-6">
+              Your code and task progress will be reset to the original starter. Your chat history in this milestone will be cleared. You can start coding again from scratch.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setShowResetConfirm(false)}
+                disabled={isResetting}
+                className="px-4 py-2 rounded-xl border border-white/[0.08] text-slate-400 hover:text-white transition-colors text-sm font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  setIsResetting(true);
+                  try {
+                    const res = await fetch("/api/milestone/reset", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ milestoneId: milestone.id }),
+                    });
+                    const data = await res.json();
+                    if (!res.ok) {
+                      if (data.error) alert(data.error);
+                      return;
+                    }
+                    const newFiles = data.files ?? { "index.html": data.code ?? "" };
+                    setFiles(newFiles);
+                    filesRef.current = newFiles;
+                    setCompletedTaskIds([]);
+                    setActiveFile(Object.keys(newFiles)[0] ?? "index.html");
+                    setPreviewSrc(buildPreviewHtml(newFiles));
+                    setPreviewKey((k) => k + 1);
+                    lastVerifiedCode.current = "";
+                    setShowResetConfirm(false);
+                    setPhase("workspace");
+                  } finally {
+                    setIsResetting(false);
+                  }
+                }}
+                disabled={isResetting}
+                className="px-4 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium disabled:opacity-50"
+              >
+                {isResetting ? "Resetting…" : "Yes, reset"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* ── Header ─────────────────────────────────────────────────── */}
       <header className="h-12 flex-shrink-0 border-b border-white/[0.07] bg-[#0b0d14] flex items-center px-3 gap-3 z-30">
         <div className="flex items-center gap-2 flex-shrink-0">
@@ -440,6 +626,17 @@ export default function WorkspaceClient({
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
           </svg>
           {showLearn ? "Hide" : "Learn"}
+        </button>
+
+        <button
+          onClick={() => setShowResetConfirm(true)}
+          className="flex items-center gap-1 px-2 py-1 rounded-lg bg-white/[0.04] border border-white/[0.07] text-[11px] font-medium text-slate-400 hover:text-orange-400 hover:border-orange-500/20 transition-colors flex-shrink-0"
+          title="Reset to starter code"
+        >
+          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          Reset
         </button>
 
         <button
@@ -569,7 +766,7 @@ export default function WorkspaceClient({
                 {/* Check my work button */}
                 {tasks.length > 0 && !allTasksDone && (
                   <button
-                    onClick={() => verifyTasks(codeRef.current)}
+                    onClick={() => verifyTasks(buildPreviewHtml(filesRef.current))}
                     disabled={isVerifying}
                     className="mt-3 w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.05] text-slate-400 text-[12px] font-semibold transition-all disabled:opacity-50"
                   >
@@ -616,19 +813,25 @@ export default function WorkspaceClient({
                 </Link>
               )}
 
-              {/* Next — disabled until all tasks done */}
+              {/* Next — take quiz first if not completed, then go to next milestone */}
               {nextMilestone ? (
                 <button
                   onClick={handleNext}
                   disabled={!nextEnabled}
-                  title={!nextEnabled ? "Complete all tasks to continue" : `Go to ${nextMilestone.title}`}
+                  title={
+                    !nextEnabled
+                      ? "Complete all tasks to continue"
+                      : milestone.status === "COMPLETED"
+                      ? `Go to ${nextMilestone.title}`
+                      : "Take the quiz to complete this milestone"
+                  }
                   className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-[12px] font-semibold transition-all ${
                     nextEnabled
                       ? `bg-gradient-to-r ${gradient} text-white hover:opacity-90 active:scale-95`
                       : "border border-white/[0.06] bg-white/[0.02] text-slate-600 cursor-not-allowed"
                   }`}
                 >
-                  Next
+                  {milestone.status !== "COMPLETED" && allTasksDone ? "Take quiz" : "Next"}
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
@@ -653,14 +856,64 @@ export default function WorkspaceClient({
           <DragHandle extraClass="hidden lg:flex" onMouseDown={(e) => startDrag("left", e)} />
         )}
 
-        {/* CENTER: Editor ──────────────────────────────────────────── */}
+        {/* CENTER: File tree + Editor ──────────────────────────────────────────── */}
         <div className={`flex flex-col flex-1 min-w-0 min-h-0 ${mobileTab === "code" ? "flex" : "hidden lg:flex"}`}>
-          <div className="h-9 flex-shrink-0 flex items-center gap-0 border-b border-white/[0.07] bg-[#0d0f1a] px-2">
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-t-md bg-[#1e1e2e] border border-white/[0.07] border-b-transparent text-[11px] font-medium text-slate-300">
-              <svg className="w-3 h-3 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-              </svg>
-              index.html
+          <div className="h-9 flex-shrink-0 flex items-center border-b border-white/[0.07] bg-[#0d0f1a]">
+            {/* File tree */}
+            <div className="flex items-center gap-0.5 px-2 min-w-0 flex-1 overflow-x-auto">
+              {Object.keys(files).map((name) => (
+                <button
+                  key={name}
+                  onClick={() => setActiveFile(name)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-t-md border border-b-0 text-[11px] font-medium transition-colors flex-shrink-0 ${
+                    activeFile === name
+                      ? "bg-[#1e1e2e] border-white/[0.07] text-slate-200"
+                      : "border-transparent text-slate-500 hover:text-slate-400 hover:bg-white/[0.04]"
+                  }`}
+                >
+                  {name.endsWith(".html") && <span className="text-orange-400">◇</span>}
+                  {name.endsWith(".css") && <span className="text-blue-400">◆</span>}
+                  {name.endsWith(".js") && <span className="text-yellow-400">◇</span>}
+                  {name}
+                </button>
+              ))}
+              <div className="relative flex-shrink-0 ml-1">
+                {showAddFile ? (
+                  <div className="flex items-center gap-1 px-2 py-1">
+                    <input
+                      type="text"
+                      value={newFileName}
+                      onChange={(e) => setNewFileName(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          const name = newFileName.trim() || "script.js";
+                          const safe = name.includes(".") ? name : `${name}.js`;
+                          if (!Object.prototype.hasOwnProperty.call(files, safe)) {
+                            const empty = safe.endsWith(".css") ? "/* styles */" : safe.endsWith(".js") ? "// your code" : "";
+                            setFiles((p) => ({ ...p, [safe]: empty }));
+                            setActiveFile(safe);
+                            setNewFileName("");
+                            setShowAddFile(false);
+                          }
+                        }
+                        if (e.key === "Escape") { setShowAddFile(false); setNewFileName(""); }
+                      }}
+                      placeholder="filename.js"
+                      className="w-24 bg-white/[0.06] border border-white/[0.1] rounded px-2 py-0.5 text-[11px] text-white placeholder:text-slate-500 outline-none"
+                      autoFocus
+                    />
+                    <button onClick={() => setShowAddFile(false)} className="text-slate-500 hover:text-white text-[10px]">Cancel</button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => { setShowAddFile(true); setNewFileName(""); }}
+                    className="p-1.5 rounded text-slate-500 hover:text-white hover:bg-white/[0.06] transition-colors"
+                    title="Add file"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 
@@ -677,9 +930,10 @@ export default function WorkspaceClient({
               </div>
             )}
             <Editor
+              key={activeFile}
               height="100%"
-              defaultLanguage="html"
-              value={code}
+              defaultLanguage={languageForFilename(activeFile)}
+              value={files[activeFile] ?? ""}
               onChange={handleCodeChange}
               theme="vs-dark"
               options={{
@@ -725,7 +979,7 @@ export default function WorkspaceClient({
               </div>
               <span className="text-[10px] text-slate-600 font-medium">Preview</span>
               <button
-                onClick={() => { setPreviewSrc(code); setPreviewKey((k) => k + 1); }}
+                onClick={() => { setPreviewSrc(buildPreviewHtml(files)); setPreviewKey((k) => k + 1); }}
                 className="text-slate-500 hover:text-white transition-colors"
                 title="Refresh preview"
               >
@@ -759,13 +1013,21 @@ export default function WorkspaceClient({
 
             <div className="flex-1 overflow-y-auto p-3 space-y-3 min-h-0">
               {chatMessages.length === 0 && (
-                <div className="text-center py-6">
-                  <p className="text-slate-600 text-[11px] leading-relaxed">
-                    Ask me anything about{" "}
-                    <span className="text-blue-400 font-medium">{milestone.concept}</span>
-                    <br />or paste your code for a review.
-                  </p>
-                </div>
+                <>
+                  <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-2.5 mb-3">
+                    <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1">About this workspace</p>
+                    <p className="text-[11px] text-slate-400 leading-relaxed">
+                      Multi-file editor with live preview — no Sandpack or npm. Use the <strong className="text-slate-300">+</strong> next to file tabs to add <code className="text-blue-300">style.css</code>, <code className="text-blue-300">script.js</code>, etc. The AI can suggest code; paste it here or ask it to add content to your sandbox.
+                    </p>
+                  </div>
+                  <div className="text-center py-4">
+                    <p className="text-slate-600 text-[11px] leading-relaxed">
+                      Ask me anything about{" "}
+                      <span className="text-blue-400 font-medium">{milestone.concept}</span>
+                      <br />or paste your code for a review.
+                    </p>
+                  </div>
+                </>
               )}
               {chatMessages.map((msg) => {
                 const isUser = msg.role === "user";

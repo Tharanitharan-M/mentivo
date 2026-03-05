@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -47,11 +48,14 @@ function totalHours(milestones: Milestone[]): string {
 }
 
 export default function RoadmapClient({ project, milestones, userName }: Props) {
+  const router = useRouter();
   const containerRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
   const lineRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const nodeRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const [showRecreateConfirm, setShowRecreateConfirm] = useState(false);
+  const [isRecreating, setIsRecreating] = useState(false);
 
   const level = project.level ?? "beginner";
   const gradient = LEVEL_GRADIENT[level] ?? LEVEL_GRADIENT.beginner;
@@ -168,9 +172,56 @@ export default function RoadmapClient({ project, milestones, userName }: Props) 
           </div>
           <div className="flex items-center gap-2">
             <span className="text-xs text-slate-500 font-medium hidden sm:block">Your Learning Roadmap</span>
+            <button
+              onClick={() => setShowRecreateConfirm(true)}
+              className="text-[11px] font-medium text-slate-400 hover:text-orange-400 transition-colors px-2 py-1 rounded-lg border border-white/[0.06] hover:border-orange-500/20"
+            >
+              Re-create roadmap
+            </button>
           </div>
         </div>
       </header>
+
+      {/* Re-create roadmap confirmation modal */}
+      {showRecreateConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <div className="bg-[#0d0f1a] border border-white/[0.1] rounded-2xl p-6 max-w-md w-full shadow-xl">
+            <h3 className="text-lg font-bold text-white mb-2">Re-create roadmap?</h3>
+            <p className="text-slate-400 text-sm leading-relaxed mb-6">
+              This will clear your current roadmap, quiz result, and conversation. You’ll start over with your app idea and get a new quiz and roadmap. This can’t be undone.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setShowRecreateConfirm(false)}
+                disabled={isRecreating}
+                className="px-4 py-2 rounded-xl border border-white/[0.08] text-slate-400 hover:text-white transition-colors text-sm font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  setIsRecreating(true);
+                  try {
+                    const res = await fetch("/api/projects/recreate-roadmap", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ projectId: project.id }),
+                    });
+                    if (res.ok) router.push(`/dashboard/project/${project.id}`);
+                  } finally {
+                    setIsRecreating(false);
+                    setShowRecreateConfirm(false);
+                  }
+                }}
+                disabled={isRecreating}
+                className="px-4 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium disabled:opacity-50"
+              >
+                {isRecreating ? "Recreating…" : "Yes, start over"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Hero ────────────────────────────────────────────────────── */}
       <div ref={heroRef} className="max-w-4xl mx-auto px-5 sm:px-8 pt-14 pb-12 text-center relative z-10">
@@ -225,6 +276,8 @@ export default function RoadmapClient({ project, milestones, userName }: Props) 
               const diff = DIFFICULTY_STYLE[milestone.difficulty] ?? DIFFICULTY_STYLE.easy;
               const isCompleted = milestone.status === "COMPLETED";
               const isInProgress = milestone.status === "IN_PROGRESS";
+              const prevMilestone = i > 0 ? milestones[i - 1] : null;
+              const isLocked = prevMilestone != null && prevMilestone.status !== "COMPLETED";
 
               return (
                 <div
@@ -337,21 +390,35 @@ export default function RoadmapClient({ project, milestones, userName }: Props) 
                         </div>
 
                         {/* CTA */}
-                        <Link
-                          href={`/dashboard/project/${project.id}/milestone/${milestone.order}`}
-                          className={`flex items-center justify-between w-full px-4 py-2.5 rounded-xl border transition-all ${
-                            isCompleted
-                              ? "bg-green-500/[0.07] border-green-500/20 hover:bg-green-500/[0.12]"
-                              : `bg-gradient-to-r ${gradient} bg-opacity-10 border-white/[0.08] group-hover:border-blue-500/20`
-                          }`}
-                        >
-                          <span className={`text-sm font-semibold ${isCompleted ? "text-green-300" : "text-white"}`}>
-                            {isCompleted ? "Review & revisit" : isInProgress ? "Continue building" : "Start this milestone"}
-                          </span>
-                          <svg className={`w-4 h-4 group-hover:translate-x-1 transition-transform ${isCompleted ? "text-green-400/70" : "text-white/70"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                          </svg>
-                        </Link>
+                        {isLocked ? (
+                          <Link
+                            href={`/dashboard/project/${project.id}/milestone/${prevMilestone!.order}`}
+                            className="flex items-center justify-between w-full px-4 py-2.5 rounded-xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04] transition-all"
+                          >
+                            <span className="text-sm font-semibold text-slate-500">
+                              Complete milestone {prevMilestone!.order} first
+                            </span>
+                            <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                          </Link>
+                        ) : (
+                          <Link
+                            href={`/dashboard/project/${project.id}/milestone/${milestone.order}`}
+                            className={`flex items-center justify-between w-full px-4 py-2.5 rounded-xl border transition-all ${
+                              isCompleted
+                                ? "bg-green-500/[0.07] border-green-500/20 hover:bg-green-500/[0.12]"
+                                : `bg-gradient-to-r ${gradient} bg-opacity-10 border-white/[0.08] group-hover:border-blue-500/20`
+                            }`}
+                          >
+                            <span className={`text-sm font-semibold ${isCompleted ? "text-green-300" : "text-white"}`}>
+                              {isCompleted ? "Review & revisit" : isInProgress ? "Continue building" : "Start this milestone"}
+                            </span>
+                            <svg className={`w-4 h-4 group-hover:translate-x-1 transition-transform ${isCompleted ? "text-green-400/70" : "text-white/70"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </Link>
+                        )}
                       </div>
                     </div>
                   </div>

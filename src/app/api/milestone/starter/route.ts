@@ -12,6 +12,7 @@ const StarterSchema = z.object({
       id: z.string(),
       text: z.string(),
       hint: z.string(),
+      test: z.string(), // JS expression run in the preview iframe; must return true/false
     })
   ).min(3).max(4),
 });
@@ -33,7 +34,8 @@ export async function POST(req: NextRequest) {
 
   // Return cached if both already generated
   if (milestone.starterCode && milestone.tasks) {
-    return NextResponse.json({ code: milestone.starterCode, tasks: milestone.tasks });
+    const files = (milestone.files as Record<string, string> | null) ?? { "index.html": milestone.starterCode };
+    return NextResponse.json({ code: milestone.starterCode, files, tasks: milestone.tasks });
   }
 
   const project = milestone.roadmap.project;
@@ -64,19 +66,32 @@ TASKS rules (3–4 tasks):
 - Written as clear instructions ("Add", "Create", "Make", "Write")
 - The hint should be a short code snippet or direction (one line)
 - IDs: t1, t2, t3, t4
-- Together, completing all tasks means the milestone is essentially built`,
+- Together, completing all tasks means the milestone is essentially built
+
+For EACH task you MUST provide a "test" field: a short JavaScript expression that runs in the BROWSER (same window as the learner's page) and returns true if the task is done, false otherwise.
+- Use only the DOM: document.getElementById, document.querySelector, document.querySelectorAll, element.matches, .value, etc.
+- Must be a single expression or IIFE that evaluates to a boolean, e.g. "!!document.getElementById('expense-form')" or "(function(){ return document.querySelectorAll('input').length >= 2; })()"
+- No document.write, no fetch, no external URLs. Must run synchronously.
+- The learner's HTML/JS will already be loaded in the window when this runs.`,
   });
+
+  const html = milestone.starterCode ?? object.html;
+  const files = (milestone.files as Record<string, string> | null) ?? { "index.html": html };
 
   await prisma.milestone.update({
     where: { id: milestoneId },
     data: {
-      starterCode: milestone.starterCode ?? object.html,
+      starterCode: milestone.starterCode ?? html,
+      starterFiles: milestone.starterFiles ?? files, // keep original for "Reset milestone"
+      code: milestone.code ?? html,
+      files: milestone.files ?? files,
       tasks: milestone.tasks ?? object.tasks,
     },
   });
 
   return NextResponse.json({
-    code: milestone.starterCode ?? object.html,
+    code: html,
+    files,
     tasks: milestone.tasks ?? object.tasks,
   });
 }

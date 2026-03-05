@@ -107,7 +107,9 @@ model Milestone {
   status         MilestoneStatus @default(UNLOCKED)
   conceptContent String?         @db.Text
   starterCode      String?         @db.Text
+  starterFiles     Json?           // snapshot of files at generation — used for "Reset milestone"
   code             String?         @db.Text
+  files            Json?           // multi-file: { "index.html": "...", "style.css": "...", "script.js": "..." }
   tasks            Json?
   completedTaskIds String[]        @default([])
   createdAt        DateTime        @default(now())
