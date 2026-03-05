@@ -268,6 +268,7 @@ export default function WorkspaceClient({
   const [saveStatus, setSaveStatus] = useState<"saved" | "saving" | "unsaved">("saved");
   const filesRef = useRef(files);
   filesRef.current = files;
+  const editorRef = useRef<{ getAction: (id: string) => { run: () => void } | null } | null>(null);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const previewTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const verifyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -905,13 +906,22 @@ export default function WorkspaceClient({
                     <button onClick={() => setShowAddFile(false)} className="text-slate-500 hover:text-white text-[10px]">Cancel</button>
                   </div>
                 ) : (
-                  <button
-                    onClick={() => { setShowAddFile(true); setNewFileName(""); }}
-                    className="p-1.5 rounded text-slate-500 hover:text-white hover:bg-white/[0.06] transition-colors"
-                    title="Add file"
-                  >
-                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
-                  </button>
+                  <>
+                    <button
+                      onClick={() => editorRef.current?.getAction?.("editor.action.formatDocument")?.run()}
+                      className="p-1.5 rounded text-slate-500 hover:text-white hover:bg-white/[0.06] transition-colors"
+                      title="Format document"
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" /></svg>
+                    </button>
+                    <button
+                      onClick={() => { setShowAddFile(true); setNewFileName(""); }}
+                      className="p-1.5 rounded text-slate-500 hover:text-white hover:bg-white/[0.06] transition-colors"
+                      title="Add file"
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+                    </button>
+                  </>
                 )}
               </div>
             </div>
@@ -935,6 +945,9 @@ export default function WorkspaceClient({
               defaultLanguage={languageForFilename(activeFile)}
               value={files[activeFile] ?? ""}
               onChange={handleCodeChange}
+              onMount={(editor) => {
+                editorRef.current = editor;
+              }}
               theme="vs-dark"
               options={{
                 fontSize: 13,
@@ -948,6 +961,7 @@ export default function WorkspaceClient({
                 smoothScrolling: true,
                 padding: { top: 12, bottom: 12 },
                 tabSize: 2,
+                formatOnPaste: true,
               }}
             />
           </div>
