@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation";
+import { auth } from "@/auth";
 import Navbar from "@/components/landing/Navbar";
 import HeroSection from "@/components/landing/HeroSection";
 import StatsSection from "@/components/landing/StatsSection";
@@ -6,7 +8,11 @@ import HowItWorks from "@/components/landing/HowItWorks";
 import CTASection from "@/components/landing/CTASection";
 import Footer from "@/components/landing/Footer";
 
-export default function Home() {
+export default async function Home() {
+  const session = await auth();
+  if (session?.user) {
+    redirect("/dashboard");
+  }
   return (
     <main className="bg-[#07080f] min-h-screen">
       <Navbar />
