@@ -1,24 +1,10 @@
 import { generateObject } from "ai";
 import { model } from "@/lib/ai";
 import { getPrompt } from "@/lib/prompts";
+import { RoadmapSchema } from "@/lib/schemas";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
-
-const RoadmapSchema = z.object({
-  milestones: z.array(
-    z.object({
-      order: z.number(),
-      title: z.string(),
-      description: z.string(),
-      concept: z.string(),
-      estimatedTime: z.string(),
-      difficulty: z.enum(["easy", "medium", "hard"]),
-      tags: z.array(z.string()),
-    })
-  ),
-});
 
 export async function POST(req: NextRequest) {
   const session = await auth();

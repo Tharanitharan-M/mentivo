@@ -1,22 +1,10 @@
 import { generateObject } from "ai";
 import { model } from "@/lib/ai";
 import { getPrompt } from "@/lib/prompts";
+import { StarterSchema } from "@/lib/schemas";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
-
-const StarterSchema = z.object({
-  html: z.string(),
-  tasks: z.array(
-    z.object({
-      id: z.string(),
-      text: z.string(),
-      hint: z.string(),
-      test: z.string(), // JS expression run in the preview iframe; must return true/false
-    })
-  ).min(3).max(4),
-});
 
 export async function POST(req: NextRequest) {
   const session = await auth();

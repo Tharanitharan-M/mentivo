@@ -1,24 +1,10 @@
 import { generateObject } from "ai";
 import { model } from "@/lib/ai";
 import { getPrompt } from "@/lib/prompts";
+import { QuizSchema } from "@/lib/schemas";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
-
-const QuizSchema = z.object({
-  questions: z.array(
-    z.object({
-      id: z.string(),
-      question: z.string(),
-      options: z.array(z.object({ id: z.string(), text: z.string() })),
-      correctId: z.string(),
-      explanation: z.string(),
-      difficulty: z.enum(["beginner", "intermediate", "advanced"]),
-      topic: z.string(),
-    })
-  ),
-});
 
 export async function POST(req: NextRequest) {
   const session = await auth();

@@ -1,11 +1,11 @@
 import { generateObject } from "ai";
 import { model } from "@/lib/ai";
 import { getPrompt } from "@/lib/prompts";
+import { QuizEvaluateSchema } from "@/lib/schemas";
 import { scoreSkillQuiz, type QuizQuestion, type Answers } from "@/lib/quiz";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
 
 export async function POST(req: NextRequest) {
   const session = await auth();
@@ -30,15 +30,7 @@ export async function POST(req: NextRequest) {
 
   const { object } = await generateObject({
     model,
-    schema: z.object({
-      level: z.enum(["beginner", "intermediate", "advanced"]),
-      levelLabel: z.string(),
-      summary: z.string(),
-      strengths: z.array(z.string()),
-      focusAreas: z.array(z.string()),
-      encouragement: z.string(),
-      nextStep: z.string(),
-    }),
+    schema: QuizEvaluateSchema,
     prompt: getPrompt("quiz-evaluate").template({
       idea: project.idea,
       score,
