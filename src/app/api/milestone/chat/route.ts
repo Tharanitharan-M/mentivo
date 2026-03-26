@@ -4,11 +4,14 @@ import { getPrompt } from "@/lib/prompts";
 import { withTracing } from "@/lib/tracing";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { rateLimitResponse } from "@/lib/rate-limit";
 import { NextRequest } from "next/server";
 
 export async function POST(req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) return new Response("Unauthorized", { status: 401 });
+  const limited = rateLimitResponse(session.user.id);
+  if (limited) return limited;
 
   const body = await req.json();
   const messages: UIMessage[] = body.messages ?? [];

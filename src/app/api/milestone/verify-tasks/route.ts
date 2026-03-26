@@ -4,6 +4,7 @@ import { getPrompt } from "@/lib/prompts";
 import { withTracing } from "@/lib/tracing";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { rateLimitResponse } from "@/lib/rate-limit";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -12,6 +13,8 @@ interface Task { id: string; text: string; hint: string }
 export async function POST(req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const limited = rateLimitResponse(session.user.id);
+  if (limited) return limited;
 
   const body = await req.json();
   const { milestoneId, completedIds: clientCompletedIds, code, tasks } = body;
