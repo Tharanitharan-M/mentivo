@@ -21,7 +21,13 @@ export type {
   PromptChangelogEntry,
 } from './types'
 
-// ── Prompt registrations (1b + 1c) ───────────────────────────────────────────
+// ── Prompt registrations ──────────────────────────────────────────────────────
 // Each import executes registerPrompt() as a side effect.
-// Prompts are added here as they are extracted in subsequent components.
 // ─────────────────────────────────────────────────────────────────────────────
+
+// Component 1b — core flow prompts
+export { onboardingChat } from './onboarding-chat'
+export { quizGenerate } from './quiz-generate'
+export { quizEvaluate } from './quiz-evaluate'
+export { roadmapGenerate } from './roadmap-generate'
+export { milestoneChat } from './milestone-chat'
