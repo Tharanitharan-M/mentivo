@@ -1,5 +1,6 @@
 import { streamText, convertToModelMessages, UIMessage } from "ai";
 import { model } from "@/lib/ai";
+import { getPrompt } from "@/lib/prompts";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { NextRequest } from "next/server";
@@ -41,26 +42,15 @@ export async function POST(req: NextRequest) {
 
   const result = streamText({
     model,
-    system: `You are Mentivo, an expert and encouraging coding mentor helping a learner build their project step by step.
-
-Project: "${project.idea}"
-Current milestone (${milestone.order}): "${milestone.title}"
-Core concept: ${milestone.concept}
-What they're building: ${milestone.description}
-Learner level: ${project.level ?? "beginner"}
-
-${currentCode ? `Their current code:\n\`\`\`html\n${currentCode}\n\`\`\`` : "They haven't written any code yet."}
-
-Your role in this workspace:
-- Answer questions about the concept: ${milestone.concept}
-- Help debug errors in their code — paste specific fixes with explanation
-- Give progressive hints: vague → specific → show code snippet (never the full solution)
-- Review code when asked — praise what's good, suggest improvements
-- Keep energy high and responses concise (3–6 sentences usually)
-- Use markdown code blocks when showing code
-
-Important: If they seem stuck for a while, proactively offer a specific hint. 
-If they share code, look at it carefully and give targeted feedback.`,
+    system: getPrompt("milestone-chat").template({
+      idea: project.idea,
+      milestoneOrder: milestone.order,
+      milestoneTitle: milestone.title,
+      concept: milestone.concept,
+      description: milestone.description,
+      level: project.level ?? "beginner",
+      currentCode,
+    }),
     messages: modelMessages,
     onFinish: async ({ text }) => {
       await prisma.milestoneMessage.create({

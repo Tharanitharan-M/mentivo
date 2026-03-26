@@ -1,5 +1,6 @@
 import { generateObject } from "ai";
 import { model } from "@/lib/ai";
+import { getPrompt } from "@/lib/prompts";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
@@ -47,24 +48,10 @@ export async function POST(req: NextRequest) {
   const { object } = await generateObject({
     model,
     schema: RoadmapSchema,
-    prompt: `Create a milestone-based learning roadmap for a student building their project.
-
-Project idea: "${project.idea}"
-Student level: ${quizLevel}
-
-Generate exactly 7 milestones that progressively build the complete project from scratch.
-
-Guidelines:
-- Each milestone builds directly on the previous one — they form a continuous project
-- Each milestone should be completable in 2–4 hours of focused work
-- Each teaches exactly ONE main programming concept
-- Milestone 1 should be "Set up the project" — environment, file structure, basic scaffold
-- Final milestone should result in a fully working, deployable project
-- Concept names should be specific (e.g. "Event Listeners" not just "JavaScript")
-- Tags should be 2–4 specific technologies or concepts (e.g. ["HTML", "CSS Grid", "Flexbox"])
-- Descriptions should be 2 sentences: what they'll build + what they'll learn
-- For ${quizLevel} level: ${quizLevel === "beginner" ? "start from absolute basics, no assumed knowledge" : quizLevel === "intermediate" ? "assume basic HTML/CSS/JS knowledge, dive deeper" : "assume solid fundamentals, focus on architecture and best practices"}
-- estimatedTime examples: "1–2 hours", "2–3 hours", "3–4 hours"`,
+    prompt: getPrompt("roadmap-generate").template({
+      idea: project.idea,
+      level: quizLevel as "beginner" | "intermediate" | "advanced",
+    }),
   });
 
   // Save roadmap + milestones to DB

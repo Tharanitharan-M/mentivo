@@ -1,5 +1,6 @@
 import { generateObject } from "ai";
 import { model } from "@/lib/ai";
+import { getPrompt } from "@/lib/prompts";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
@@ -45,34 +46,15 @@ export async function POST(req: NextRequest) {
   const { object } = await generateObject({
     model,
     schema: StarterSchema,
-    prompt: `Generate starter HTML/CSS/JS code AND verifiable coding tasks for a milestone.
-
-Project: "${project.idea}"
-Milestone ${milestone.order}: "${milestone.title}"
-Concept to teach: "${milestone.concept}"
-What to build: "${milestone.description}"
-Student level: ${level}
-
-STARTER CODE rules:
-${isFirst
-  ? "- Clean HTML5 boilerplate with <style> and <script> blocks\n- TODO comments showing where to build\n- Just the skeleton, not the implementation"
-  : "- Builds on earlier milestones (assume basic HTML structure exists)\n- Shows this milestone's feature scaffold\n- ~20-30% pre-filled to get them started"
-}
-- Under 70 lines, relevant to "${project.idea}", ${level === "beginner" ? "lots of guiding comments" : "clean code with few comments"}
-
-TASKS rules (3–4 tasks):
-- Each is a concrete, verifiable coding action (e.g. "Add a <form> element with id='expense-form'")
-- Ordered from simple to complex — each builds on the previous
-- Written as clear instructions ("Add", "Create", "Make", "Write")
-- The hint should be a short code snippet or direction (one line)
-- IDs: t1, t2, t3, t4
-- Together, completing all tasks means the milestone is essentially built
-
-For EACH task you MUST provide a "test" field: a short JavaScript expression that runs in the BROWSER (same window as the learner's page) and returns true if the task is done, false otherwise.
-- Use only the DOM: document.getElementById, document.querySelector, document.querySelectorAll, element.matches, .value, etc.
-- Must be a single expression or IIFE that evaluates to a boolean, e.g. "!!document.getElementById('expense-form')" or "(function(){ return document.querySelectorAll('input').length >= 2; })()"
-- No document.write, no fetch, no external URLs. Must run synchronously.
-- The learner's HTML/JS will already be loaded in the window when this runs.`,
+    prompt: getPrompt("milestone-starter").template({
+      idea: project.idea,
+      milestoneOrder: milestone.order,
+      milestoneTitle: milestone.title,
+      concept: milestone.concept,
+      description: milestone.description,
+      level,
+      isFirst,
+    }),
   });
 
   const html = milestone.starterCode ?? object.html;
