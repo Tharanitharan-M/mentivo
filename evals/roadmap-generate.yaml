@@ -1,0 +1,65 @@
+# ─── Roadmap Generation Eval ──────────────────────────────────────────────────
+# Tests that roadmap-generate produces valid 7-milestone progressive roadmaps.
+# Mix of programmatic assertions (structural) + llm-rubric (quality).
+#
+# Run:  npm run eval:roadmap
+# ─────────────────────────────────────────────────────────────────────────────
+
+description: "Roadmap Generation Quality"
+
+defaultTest:
+  options:
+    provider: google:gemini-2.5-flash
+
+prompts:
+  - id: "roadmap-prompt"
+    label: "roadmap-generate v1.0.0"
+    raw: "{{idea}} - {{level}}"
+
+providers:
+  - id: "file://providers/roadmap-provider.ts"
+    label: "Mentivo Roadmap"
+
+tests:
+  # ── Beginner expense tracker ──
+  - description: "Beginner expense tracker — easy-first, progressive roadmap"
+    vars:
+      idea: "Personal expense tracker with charts"
+      level: "beginner"
+    assert:
+      - type: javascript
+        value: "JSON.parse(output).milestones?.length === 7"
+      - type: javascript
+        value: "JSON.parse(output).milestones?.[0]?.difficulty === 'easy'"
+      - type: javascript
+        value: "JSON.parse(output).milestones?.some(m => m.difficulty === 'hard')"
+      - type: javascript
+        value: "JSON.parse(output).milestones?.every(m => m.title?.trim() && m.description?.trim() && m.concept?.trim())"
+      - type: llm-rubric
+        value: "Milestone 1 should be about project setup (file structure, HTML boilerplate, basic scaffold), NOT a complex feature."
+      - type: llm-rubric
+        value: "The milestones should progressively increase in complexity, building toward a complete expense tracker with charts."
+
+  # ── Intermediate recipe finder ──
+  - description: "Intermediate recipe finder — assumes HTML/CSS/JS knowledge"
+    vars:
+      idea: "Recipe finder that searches by ingredients with difficulty ratings"
+      level: "intermediate"
+    assert:
+      - type: javascript
+        value: "JSON.parse(output).milestones?.length === 7"
+      - type: javascript
+        value: "JSON.parse(output).milestones?.[0]?.difficulty === 'easy'"
+      - type: llm-rubric
+        value: "For an intermediate student, milestones should go beyond basic HTML/CSS and include API integration, data filtering, or dynamic rendering."
+
+  # ── Advanced social platform ──
+  - description: "Advanced social feed — architecture and patterns focus"
+    vars:
+      idea: "Real-time social feed with likes, comments, and notifications"
+      level: "advanced"
+    assert:
+      - type: javascript
+        value: "JSON.parse(output).milestones?.length === 7"
+      - type: llm-rubric
+        value: "For an advanced student building a social feed, milestones should cover real-time updates, state management, component architecture, or performance — not just basic HTML."

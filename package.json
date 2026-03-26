@@ -10,7 +10,12 @@
     "postinstall": "prisma generate",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "eval": "NODE_OPTIONS='--import tsx/esm' promptfoo eval -c evals/roadmap-generate.yaml && NODE_OPTIONS='--import tsx/esm' promptfoo eval -c evals/quiz-generate.yaml && NODE_OPTIONS='--import tsx/esm' promptfoo eval -c evals/milestone-starter.yaml",
+    "eval:roadmap": "NODE_OPTIONS='--import tsx/esm' promptfoo eval -c evals/roadmap-generate.yaml",
+    "eval:quiz": "NODE_OPTIONS='--import tsx/esm' promptfoo eval -c evals/quiz-generate.yaml",
+    "eval:starter": "NODE_OPTIONS='--import tsx/esm' promptfoo eval -c evals/milestone-starter.yaml",
+    "eval:view": "promptfoo view"
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.37",
@@ -49,6 +54,7 @@
     "jsdom": "^29.0.1",
     "prettier": "^3.8.1",
     "prisma": "^7.4.2",
+    "promptfoo": "^0.120.19",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^4.1.1"

@@ -1,0 +1,59 @@
+# ─── Milestone Starter Eval ───────────────────────────────────────────────────
+# Tests that milestone-starter produces valid HTML + 3-4 verifiable tasks.
+#
+# Run:  npm run eval:starter
+# ─────────────────────────────────────────────────────────────────────────────
+
+description: "Milestone Starter Code Quality"
+
+defaultTest:
+  options:
+    provider: google:gemini-2.5-flash
+
+prompts:
+  - id: "starter-prompt"
+    label: "milestone-starter v1.0.0"
+    raw: "{{idea}} - {{milestoneTitle}}"
+
+providers:
+  - id: "file://providers/starter-provider.ts"
+    label: "Mentivo Starter"
+
+tests:
+  # ── First milestone (project setup) ──
+  - description: "First milestone — HTML5 boilerplate with TODO comments"
+    vars:
+      idea: "Personal expense tracker with charts"
+      milestoneOrder: "1"
+      milestoneTitle: "Set up the project"
+      concept: "Project Structure & Environment Setup"
+      description: "Set up the basic project structure with HTML, CSS, and JavaScript files."
+      level: "beginner"
+      isFirst: "true"
+    assert:
+      - type: javascript
+        value: "(JSON.parse(output).html || '').toLowerCase().includes('<body')"
+      - type: javascript
+        value: "(() => { const t = JSON.parse(output).tasks; return t?.length >= 3 && t?.length <= 4; })()"
+      - type: javascript
+        value: "JSON.parse(output).tasks?.every(t => t.text?.trim() && t.hint?.trim() && t.test?.trim())"
+      - type: llm-rubric
+        value: "For a first milestone, the starter code should be a clean HTML5 boilerplate with TODO comments showing where to build — NOT a fully implemented feature."
+
+  # ── Later milestone (builds on previous) ──
+  - description: "Milestone 4 — builds on existing code, partial implementation"
+    vars:
+      idea: "Personal expense tracker with charts"
+      milestoneOrder: "4"
+      milestoneTitle: "Display expenses in a table"
+      concept: "DOM Manipulation & Dynamic Rendering"
+      description: "Build a dynamic table that displays expenses, updating in real-time."
+      level: "beginner"
+      isFirst: "false"
+    assert:
+      - type: javascript
+        value: "(() => { const t = JSON.parse(output).tasks; return t?.length >= 3 && t?.length <= 4; })()"
+      - type: javascript
+        value: "JSON.parse(output).tasks?.every(t => t.test?.trim())"
+      - type: llm-rubric
+        value: "For milestone 4, the code should assume earlier milestones are complete and focus specifically on DOM manipulation and dynamic table rendering."

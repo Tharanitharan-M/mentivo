@@ -1,0 +1,62 @@
+# ─── Quiz Generation Eval ─────────────────────────────────────────────────────
+# Tests that quiz-generate produces 6 tiered questions with valid structure.
+#
+# Run:  npm run eval:quiz
+# ─────────────────────────────────────────────────────────────────────────────
+
+description: "Quiz Generation Quality"
+
+defaultTest:
+  options:
+    provider: google:gemini-2.5-flash
+
+prompts:
+  - id: "quiz-prompt"
+    label: "quiz-generate v1.0.0"
+    raw: "{{idea}}"
+
+providers:
+  - id: "file://providers/quiz-provider.ts"
+    label: "Mentivo Quiz"
+
+tests:
+  # ── Weather dashboard ──
+  - description: "Weather dashboard — 6 tiered questions relevant to the project"
+    vars:
+      idea: "Weather dashboard that shows 5-day forecast with charts"
+      conversationSummary: ""
+    assert:
+      - type: javascript
+        value: "JSON.parse(output).questions?.length === 6"
+      - type: javascript
+        value: "JSON.parse(output).questions?.every(q => q.options?.length === 4 && q.options.some(o => o.id === q.correctId))"
+      - type: javascript
+        value: "new Set(JSON.parse(output).questions?.map(q => q.difficulty)).size >= 2"
+      - type: llm-rubric
+        value: "Questions should be relevant to building a weather dashboard — testing concepts like API calls, data display, and chart rendering, not unrelated topics."
+
+  # ── Todo list ──
+  - description: "Todo list — basic project, still needs tiered questions"
+    vars:
+      idea: "Simple todo list with add, complete, and delete functionality"
+      conversationSummary: ""
+    assert:
+      - type: javascript
+        value: "JSON.parse(output).questions?.length === 6"
+      - type: javascript
+        value: "JSON.parse(output).questions?.every(q => q.options?.length === 4 && q.options.some(o => o.id === q.correctId))"
+      - type: llm-rubric
+        value: "Questions should test understanding relevant to building a todo list — DOM manipulation, event handling, CRUD operations — progressing from beginner to advanced."
+
+  # ── E-commerce store ──
+  - description: "E-commerce store — complex project, questions should reflect depth"
+    vars:
+      idea: "Online store with product listings, cart, and checkout"
+      conversationSummary: ""
+    assert:
+      - type: javascript
+        value: "JSON.parse(output).questions?.length === 6"
+      - type: javascript
+        value: "new Set(JSON.parse(output).questions?.map(q => q.difficulty)).size >= 2"
+      - type: llm-rubric
+        value: "For a complex e-commerce project, advanced questions should cover state management, payment patterns, or database design — not just basic HTML."
