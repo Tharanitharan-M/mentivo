@@ -49,7 +49,7 @@ const LEVEL_CONFIG: Record<string, { gradient: string; glow: string; border: str
   },
 };
 
-export default function QuizResults({ result, projectId, projectIdea, existingQuiz, userName }: Props) {
+export default function QuizResults({ result, projectId, projectIdea, existingQuiz, userName: _userName }: Props) {
   const router = useRouter();
   const [isGenerating, setIsGenerating] = useState(false);
 

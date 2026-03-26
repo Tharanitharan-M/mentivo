@@ -346,7 +346,7 @@ export default function HowItWorks() {
             </span>
           </h2>
           <p className="text-slate-400 text-lg leading-relaxed">
-            There's no setup friction and no copy paste confusion. Just a clear
+            There&apos;s no setup friction and no copy paste confusion. Just a clear
             path from zero to a real, deployed project that you actually understand.
           </p>
         </div>

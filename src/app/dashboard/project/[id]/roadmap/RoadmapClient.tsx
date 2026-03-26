@@ -47,7 +47,7 @@ function totalHours(milestones: Milestone[]): string {
   return `${total}–${total + milestones.length} hours`;
 }
 
-export default function RoadmapClient({ project, milestones, userName }: Props) {
+export default function RoadmapClient({ project, milestones, userName: _userName }: Props) {
   const router = useRouter();
   const containerRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);

@@ -21,7 +21,7 @@ const DIFFICULTY_STYLE = {
   advanced: "text-purple-400 border-purple-400/20 bg-purple-400/[0.06]",
 };
 
-export default function QuizView({ projectIdea, questions, onComplete, userName, readyText }: Props) {
+export default function QuizView({ projectIdea: _projectIdea, questions, onComplete, userName, readyText }: Props) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [selectedOption, setSelectedOption] = useState<string | null>(null);

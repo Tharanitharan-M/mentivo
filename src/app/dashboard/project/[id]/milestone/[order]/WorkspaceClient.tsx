@@ -346,6 +346,7 @@ export default function WorkspaceClient({
         if (d.tasks) setTasks(d.tasks);
       })
       .finally(() => setIsStarterLoading(false));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [milestone.id, milestone.starterCode, milestone.tasks, milestone.code]);
 
   const testHtmlRef = useRef<string>("");

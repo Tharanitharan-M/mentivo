@@ -216,7 +216,7 @@ function BentoCard({ card }: { card: CardType }) {
 /* ─── Scrolling column ──────────────────────────────────── */
 function ScrollColumn({
   cards,
-  duration,
+  duration: _duration,
   colRef,
 }: {
   cards: CardType[];
