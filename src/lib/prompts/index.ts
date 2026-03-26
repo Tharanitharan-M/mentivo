@@ -31,3 +31,9 @@ export { quizGenerate } from './quiz-generate'
 export { quizEvaluate } from './quiz-evaluate'
 export { roadmapGenerate } from './roadmap-generate'
 export { milestoneChat } from './milestone-chat'
+
+// Component 1c — milestone workspace prompts
+export { milestoneConcept } from './milestone-concept'
+export { milestoneStarter } from './milestone-starter'
+export { milestoneVerifyTasks } from './milestone-verify-tasks'
+export { milestoneQuizGenerate } from './milestone-quiz-generate'
