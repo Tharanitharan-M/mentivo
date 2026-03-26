@@ -1,0 +1,120 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ── 1. Type check ────────────────────────────────────────────────────────────
+  type-check:
+    name: Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx tsc --noEmit
+
+  # ── 2. Lint ──────────────────────────────────────────────────────────────────
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+
+  # ── 3. Unit tests + coverage ─────────────────────────────────────────────────
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run test:coverage
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 7
+
+  # ── 4. Build ─────────────────────────────────────────────────────────────────
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    env:
+      # Build needs non-empty env vars to pass type checks and Prisma generate.
+      # These are dummy values — the build should not make real network calls.
+      DATABASE_URL: postgresql://user:pass@localhost:5432/db?sslmode=require
+      DATABASE_URL_UNPOOLED: postgresql://user:pass@localhost:5432/db?sslmode=require
+      NEXTAUTH_SECRET: ci-build-secret
+      NEXTAUTH_URL: http://localhost:3000
+      GOOGLE_CLIENT_ID: ci-client-id
+      GOOGLE_CLIENT_SECRET: ci-client-secret
+      GOOGLE_GENERATIVE_AI_API_KEY: ci-gemini-key
+      LANGFUSE_PUBLIC_KEY: ci-langfuse-pk
+      LANGFUSE_SECRET_KEY: ci-langfuse-sk
+      LANGFUSE_BASE_URL: https://us.cloud.langfuse.com
+      LANGFUSE_BASEURL: https://us.cloud.langfuse.com
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+
+  # ── 5. Prompt eval (PRs only) ────────────────────────────────────────────────
+  # Runs the full LLM evaluation suite on pull requests to catch prompt
+  # regressions before they reach main. Uses real Gemini API calls.
+  # Failures are warnings only (continue-on-error) — a human reviews the results.
+  prompt-eval:
+    name: Prompt Eval (LLM)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    continue-on-error: true
+    env:
+      GOOGLE_GENERATIVE_AI_API_KEY: ${{ secrets.GOOGLE_GENERATIVE_AI_API_KEY }}
+      GOOGLE_API_KEY: ${{ secrets.GOOGLE_GENERATIVE_AI_API_KEY }}
+      LANGFUSE_PUBLIC_KEY: ${{ secrets.LANGFUSE_PUBLIC_KEY }}
+      LANGFUSE_SECRET_KEY: ${{ secrets.LANGFUSE_SECRET_KEY }}
+      LANGFUSE_BASE_URL: https://us.cloud.langfuse.com
+      LANGFUSE_BASEURL: https://us.cloud.langfuse.com
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Run roadmap eval
+        run: npm run eval:roadmap
+      - name: Run quiz eval
+        run: npm run eval:quiz
+      - name: Run starter eval
+        run: npm run eval:starter
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: promptfoo-results
+          path: ~/.promptfoo/output/
+          retention-days: 7
