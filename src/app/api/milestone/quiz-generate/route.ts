@@ -2,6 +2,7 @@ import { generateObject } from "ai";
 import { model } from "@/lib/ai";
 import { getPrompt } from "@/lib/prompts";
 import { QuizSchema } from "@/lib/schemas";
+import { withTracing } from "@/lib/tracing";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
@@ -35,6 +36,7 @@ export async function POST(req: NextRequest) {
       level: project.level ?? "beginner",
       userCode: userCode.slice(0, 800),
     }),
+    ...withTracing("milestone-quiz-generate", { userId: session.user.id, milestoneId }),
   });
 
   return NextResponse.json({ questions: object.questions });

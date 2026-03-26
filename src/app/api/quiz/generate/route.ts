@@ -2,6 +2,7 @@ import { generateObject } from "ai";
 import { model } from "@/lib/ai";
 import { getPrompt } from "@/lib/prompts";
 import { QuizSchema } from "@/lib/schemas";
+import { withTracing } from "@/lib/tracing";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
@@ -26,6 +27,7 @@ export async function POST(req: NextRequest) {
     model,
     schema: QuizSchema,
     prompt: getPrompt("quiz-generate").template({ idea: project.idea, conversationSummary }),
+    ...withTracing("quiz-generate", { userId: session.user.id, projectId }),
   });
 
   await prisma.project.update({

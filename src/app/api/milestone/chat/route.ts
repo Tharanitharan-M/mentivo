@@ -1,6 +1,7 @@
 import { streamText, convertToModelMessages, UIMessage } from "ai";
 import { model } from "@/lib/ai";
 import { getPrompt } from "@/lib/prompts";
+import { withTracing } from "@/lib/tracing";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { NextRequest } from "next/server";
@@ -52,6 +53,7 @@ export async function POST(req: NextRequest) {
       currentCode,
     }),
     messages: modelMessages,
+    ...withTracing("milestone-chat", { userId: session.user.id, milestoneId }),
     onFinish: async ({ text }) => {
       await prisma.milestoneMessage.create({
         data: { milestoneId, role: "assistant", content: text },

@@ -2,6 +2,7 @@ import { generateObject } from "ai";
 import { model } from "@/lib/ai";
 import { getPrompt } from "@/lib/prompts";
 import { StarterSchema } from "@/lib/schemas";
+import { withTracing } from "@/lib/tracing";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
@@ -43,6 +44,7 @@ export async function POST(req: NextRequest) {
       level,
       isFirst,
     }),
+    ...withTracing("milestone-starter", { userId: session.user.id, milestoneId }),
   });
 
   const html = milestone.starterCode ?? object.html;

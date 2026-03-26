@@ -1,6 +1,7 @@
 import { streamText, convertToModelMessages, UIMessage } from "ai";
 import { model } from "@/lib/ai";
 import { getPrompt } from "@/lib/prompts";
+import { withTracing } from "@/lib/tracing";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { NextRequest } from "next/server";
@@ -42,6 +43,7 @@ export async function POST(req: NextRequest) {
     model,
     system: getPrompt("onboarding-chat").template({ idea: project.idea }),
     messages: modelMessages,
+    ...withTracing("onboarding-chat", { userId: session.user.id, projectId }),
     onFinish: async ({ text }) => {
       await prisma.message.create({
         data: { projectId, role: "assistant", content: text },

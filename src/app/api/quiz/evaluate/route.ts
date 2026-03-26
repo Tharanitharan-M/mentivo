@@ -3,6 +3,7 @@ import { model } from "@/lib/ai";
 import { getPrompt } from "@/lib/prompts";
 import { QuizEvaluateSchema } from "@/lib/schemas";
 import { scoreSkillQuiz, type QuizQuestion, type Answers } from "@/lib/quiz";
+import { withTracing } from "@/lib/tracing";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
@@ -38,6 +39,7 @@ export async function POST(req: NextRequest) {
       percentage,
       questionBreakdown,
     }),
+    ...withTracing("quiz-evaluate", { userId: session.user.id, projectId }),
   });
 
   await prisma.quiz.upsert({

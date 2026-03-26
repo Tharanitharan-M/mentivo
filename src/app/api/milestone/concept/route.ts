@@ -1,6 +1,7 @@
 import { generateText } from "ai";
 import { model } from "@/lib/ai";
 import { getPrompt } from "@/lib/prompts";
+import { withTracing } from "@/lib/tracing";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
@@ -34,6 +35,7 @@ export async function POST(req: NextRequest) {
       idea: project.idea,
       level,
     }),
+    ...withTracing("milestone-concept", { userId: session.user.id, milestoneId }),
   });
 
   await prisma.milestone.update({
