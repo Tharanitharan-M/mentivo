@@ -1,18 +1,11 @@
 import { generateObject } from "ai";
 import { model } from "@/lib/ai";
 import { getPrompt } from "@/lib/prompts";
+import { scoreSkillQuiz, type QuizQuestion, type Answers } from "@/lib/quiz";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-
-interface QuizQuestion {
-  id: string;
-  question: string;
-  correctId: string;
-  difficulty: string;
-  topic: string;
-}
 
 export async function POST(req: NextRequest) {
   const session = await auth();
@@ -30,18 +23,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Project not found" }, { status: 404 });
   }
 
-  const score = (questions as QuizQuestion[]).reduce(
-    (acc: number, q: QuizQuestion) => acc + (answers[q.id] === q.correctId ? 1 : 0),
-    0
+  const { score, percentage, questionBreakdown } = scoreSkillQuiz(
+    questions as QuizQuestion[],
+    answers as Answers,
   );
-  const percentage = (score / questions.length) * 100;
-
-  const questionBreakdown = (questions as QuizQuestion[])
-    .map(
-      (q: QuizQuestion, i: number) =>
-        `Q${i + 1} [${q.difficulty}] ${q.topic}: ${answers[q.id] === q.correctId ? "✓ Correct" : "✗ Incorrect"}`
-    )
-    .join("\n");
 
   const { object } = await generateObject({
     model,
