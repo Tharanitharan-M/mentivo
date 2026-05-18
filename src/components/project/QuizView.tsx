@@ -65,7 +65,7 @@ export default function QuizView({ projectIdea: _projectIdea, questions, onCompl
   const isCorrect = selectedOption === currentQuestion?.correctId;
 
   return (
-    <div className="min-h-screen bg-[#07080f] flex flex-col">
+    <div className="min-h-screen bg-[#0b0a09] flex flex-col">
       {/* Ambient */}
       <div
         aria-hidden
@@ -74,7 +74,7 @@ export default function QuizView({ projectIdea: _projectIdea, questions, onCompl
       />
 
       {/* Header */}
-      <header className="border-b border-white/[0.06] bg-[#07080f]/90 backdrop-blur-2xl sticky top-0 z-40">
+      <header className="border-b border-white/[0.06] bg-[#0b0a09]/90 backdrop-blur-2xl sticky top-0 z-40">
         <div className="max-w-2xl mx-auto px-5 sm:px-8 h-[56px] flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link href="/dashboard" className="text-slate-500 hover:text-white transition-colors">
@@ -100,7 +100,7 @@ export default function QuizView({ projectIdea: _projectIdea, questions, onCompl
       {/* Progress bar */}
       <div className="h-[3px] bg-white/[0.05]">
         <div
-          className="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-500 ease-out"
+          className="h-full bg-amber-500 transition-all duration-500 ease-out"
           style={{ width: `${progress + (1 / totalQuestions) * 100}%` }}
         />
       </div>
@@ -171,9 +171,9 @@ export default function QuizView({ projectIdea: _projectIdea, questions, onCompl
                     className={`
                       w-full flex items-center gap-3.5 p-4 rounded-xl border text-left transition-all duration-200
                       ${!showFeedback && !isSelected
-                        ? "border-white/[0.07] bg-white/[0.02] hover:border-blue-500/30 hover:bg-blue-500/[0.05] hover:text-white text-slate-300 cursor-pointer active:scale-[0.99]"
+                        ? "border-white/[0.07] bg-white/[0.02] hover:border-amber-500/30 hover:bg-amber-500/[0.05] hover:text-white text-slate-300 cursor-pointer active:scale-[0.99]"
                         : ""}
-                      ${isSelected && !showFeedback ? "border-blue-500/40 bg-blue-500/[0.08] text-white" : ""}
+                      ${isSelected && !showFeedback ? "border-amber-500/40 bg-amber-500/[0.08] text-white" : ""}
                       ${showCorrect ? "border-green-500/40 bg-green-500/[0.08] text-green-300" : ""}
                       ${showWrong ? "border-red-500/30 bg-red-500/[0.06] text-red-300" : ""}
                       ${showFeedback && !isSelected && !isThisCorrect ? "border-white/[0.04] bg-white/[0.01] text-slate-600 opacity-50" : ""}
@@ -219,9 +219,9 @@ export default function QuizView({ projectIdea: _projectIdea, questions, onCompl
                 key={i}
                 className={`rounded-full transition-all duration-300 ${
                   i < currentIndex
-                    ? "w-2 h-2 bg-blue-500"
+                    ? "w-2 h-2 bg-amber-500"
                     : i === currentIndex
-                    ? "w-4 h-2 bg-blue-400"
+                    ? "w-4 h-2 bg-amber-400"
                     : "w-2 h-2 bg-white/[0.1]"
                 }`}
               />
@@ -230,7 +230,7 @@ export default function QuizView({ projectIdea: _projectIdea, questions, onCompl
 
           {isSubmitting && (
             <div className="text-center mt-6 flex items-center justify-center gap-2 text-slate-400 text-sm">
-              <svg className="w-4 h-4 animate-spin text-blue-400" viewBox="0 0 24 24" fill="none">
+              <svg className="w-4 h-4 animate-spin text-amber-400" viewBox="0 0 24 24" fill="none">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8h4z" />
               </svg>

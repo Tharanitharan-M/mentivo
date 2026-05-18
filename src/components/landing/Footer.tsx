@@ -1,62 +1,46 @@
 import Link from "next/link";
+import Image from "next/image";
 
 const PAGE_LINKS = [
   { label: "Features", href: "#features" },
-  { label: "How It Works", href: "#how-it-works" },
-  { label: "Pricing", href: "#pricing" },
+  { label: "How it works", href: "#how-it-works" },
+  { label: "Compare", href: "#compare" },
 ];
 
 export default function Footer() {
   return (
-    <footer className="relative border-t border-white/[0.06] py-12 px-6">
-      <div
-        className="absolute top-0 inset-x-0 h-px"
-        style={{
-          background:
-            "linear-gradient(to right, transparent, rgba(59,130,246,0.25), transparent)",
-        }}
-      />
-
-      <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-8">
+    <footer className="relative border-t border-[var(--border)] py-10 px-6">
+      <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2.5 shrink-0">
-          <div className="w-7 h-7 rounded-[7px] bg-blue-500 flex items-center justify-center">
-            <svg
-              viewBox="0 0 16 16"
-              className="w-4 h-4 text-white"
-              fill="none"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M8 2a4 4 0 014 4c0 1.5-.8 2.8-2 3.5V11H6V9.5A4 4 0 018 2zm-1 9h2m-1 2v1"
-              />
-            </svg>
-          </div>
-          <span className="font-bold text-[15px] text-white tracking-[-0.02em]">
+          <Image
+            src="/logo-mark.png"
+            alt="Mentivo"
+            width={26}
+            height={26}
+            className="rounded-md"
+          />
+          <span className="font-semibold text-[14px] text-stone-200 tracking-[-0.01em]">
             Mentivo
           </span>
         </Link>
 
         {/* Page nav */}
-        <nav className="flex items-center gap-1">
+        <nav className="flex items-center gap-6">
           {PAGE_LINKS.map((l) => (
             <Link
               key={l.label}
               href={l.href}
-              className="px-3.5 py-2 rounded-lg text-[13px] font-medium text-slate-500 hover:text-white hover:bg-white/5 transition-all"
+              className="text-[13px] font-medium text-stone-500 hover:text-stone-200 transition-colors"
             >
               {l.label}
             </Link>
           ))}
         </nav>
 
-        {/* Right side */}
-        <div className="flex items-center gap-4">
-          {/* Social */}
-          <div className="flex gap-2">
+        {/* Right */}
+        <div className="flex items-center gap-5">
+          <div className="flex gap-1">
             {[
               {
                 label: "Twitter",
@@ -71,7 +55,7 @@ export default function Footer() {
                 key={s.label}
                 href="#"
                 aria-label={s.label}
-                className="w-8 h-8 rounded-lg bg-white/[0.03] border border-white/[0.07] flex items-center justify-center text-slate-600 hover:text-slate-300 hover:border-white/12 transition-all"
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-stone-600 hover:text-stone-200 transition-colors"
               >
                 <svg
                   className="w-3.5 h-3.5"
@@ -84,9 +68,7 @@ export default function Footer() {
             ))}
           </div>
 
-          <p className="text-slate-600 text-[13px]">
-            © 2026 Mentivo
-          </p>
+          <p className="text-stone-600 text-[12px]">© 2026 Mentivo</p>
         </div>
       </div>
     </footer>

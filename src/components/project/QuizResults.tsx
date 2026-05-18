@@ -30,22 +30,22 @@ interface Props {
 
 const LEVEL_CONFIG: Record<string, { gradient: string; glow: string; border: string; badge: string }> = {
   beginner: {
-    gradient: "from-sky-400 to-blue-500",
-    glow: "rgba(56, 189, 248, 0.15)",
-    border: "border-sky-500/20",
-    badge: "bg-sky-500/10 text-sky-300 border-sky-500/20",
+    gradient: "from-stone-400 to-stone-500",
+    glow: "rgba(168, 162, 158, 0.12)",
+    border: "border-stone-500/20",
+    badge: "bg-stone-500/10 text-stone-300 border-stone-500/20",
   },
   intermediate: {
-    gradient: "from-orange-400 to-amber-500",
-    glow: "rgba(251, 146, 60, 0.15)",
-    border: "border-orange-500/20",
-    badge: "bg-orange-500/10 text-orange-300 border-orange-500/20",
+    gradient: "from-amber-300 to-amber-500",
+    glow: "rgba(245, 158, 11, 0.15)",
+    border: "border-amber-500/25",
+    badge: "bg-amber-500/10 text-amber-300 border-amber-500/25",
   },
   advanced: {
-    gradient: "from-purple-400 to-violet-500",
-    glow: "rgba(167, 139, 250, 0.15)",
-    border: "border-purple-500/20",
-    badge: "bg-purple-500/10 text-purple-300 border-purple-500/20",
+    gradient: "from-orange-400 to-red-500",
+    glow: "rgba(239, 68, 68, 0.15)",
+    border: "border-red-500/20",
+    badge: "bg-red-500/10 text-red-300 border-red-500/20",
   },
 };
 
@@ -78,7 +78,7 @@ export default function QuizResults({ result, projectId, projectIdea, existingQu
   };
 
   return (
-    <div className="min-h-screen bg-[#07080f] flex flex-col">
+    <div className="min-h-screen bg-[#0b0a09] flex flex-col">
       {/* Glow */}
       <div
         aria-hidden
@@ -87,7 +87,7 @@ export default function QuizResults({ result, projectId, projectIdea, existingQu
       />
 
       {/* Header */}
-      <header className="border-b border-white/[0.06] bg-[#07080f]/90 backdrop-blur-2xl sticky top-0 z-40">
+      <header className="border-b border-white/[0.06] bg-[#0b0a09]/90 backdrop-blur-2xl sticky top-0 z-40">
         <div className="max-w-2xl mx-auto px-5 sm:px-8 h-[56px] flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link href="/dashboard" className="text-slate-500 hover:text-white transition-colors">
@@ -162,8 +162,8 @@ export default function QuizResults({ result, projectId, projectIdea, existingQu
             {focusAreas.length > 0 && (
               <div className="rounded-xl border border-white/[0.07] bg-white/[0.02] p-4">
                 <div className="flex items-center gap-2 mb-3">
-                  <div className="w-5 h-5 rounded-md bg-blue-500/10 flex items-center justify-center">
-                    <svg className="w-3 h-3 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-5 h-5 rounded-md bg-amber-500/10 flex items-center justify-center">
+                    <svg className="w-3 h-3 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                     </svg>
                   </div>
@@ -172,7 +172,7 @@ export default function QuizResults({ result, projectId, projectIdea, existingQu
                 <ul className="space-y-1.5">
                   {focusAreas.map((f, i) => (
                     <li key={i} className="text-xs text-slate-400 flex items-start gap-1.5">
-                      <span className="text-blue-500 mt-0.5">·</span>
+                      <span className="text-amber-500 mt-0.5">·</span>
                       {f}
                     </li>
                   ))}
@@ -183,7 +183,7 @@ export default function QuizResults({ result, projectId, projectIdea, existingQu
 
           {/* Project idea */}
           <div className="rounded-xl border border-white/[0.06] bg-white/[0.015] px-4 py-3 flex items-start gap-3">
-            <svg className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 text-amber-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
             </svg>
             <div>

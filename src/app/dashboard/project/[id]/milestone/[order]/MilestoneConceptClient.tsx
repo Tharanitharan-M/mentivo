@@ -30,9 +30,9 @@ const DIFFICULTY_STYLE: Record<string, { text: string; bg: string; border: strin
 };
 
 const LEVEL_GRADIENT: Record<string, string> = {
-  beginner:     "from-sky-400 to-blue-500",
+  beginner:     "from-stone-400 to-stone-500",
   intermediate: "from-orange-400 to-amber-500",
-  advanced:     "from-purple-400 to-violet-500",
+  advanced:     "from-orange-400 to-red-500",
 };
 
 export default function MilestoneConceptClient({ project, milestone, totalMilestones, nextMilestone }: Props) {
@@ -96,7 +96,7 @@ export default function MilestoneConceptClient({ project, milestone, totalMilest
   }, []);
 
   return (
-    <div ref={containerRef} className="min-h-screen bg-[#07080f]">
+    <div ref={containerRef} className="min-h-screen bg-[#0b0a09]">
       {/* Ambient glow */}
       <div
         aria-hidden
@@ -105,7 +105,7 @@ export default function MilestoneConceptClient({ project, milestone, totalMilest
       />
 
       {/* ── Nav header ────────────────────────────────────────────── */}
-      <header className="border-b border-white/[0.06] bg-[#07080f]/90 backdrop-blur-2xl sticky top-0 z-40">
+      <header className="border-b border-white/[0.06] bg-[#0b0a09]/90 backdrop-blur-2xl sticky top-0 z-40">
         <div className="max-w-3xl mx-auto px-5 sm:px-8 h-[56px] flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link
@@ -162,11 +162,11 @@ export default function MilestoneConceptClient({ project, milestone, totalMilest
 
           {/* Concept + tags row */}
           <div data-anim className="flex flex-wrap items-center gap-2">
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-500/[0.08] border border-blue-500/20">
-              <svg className="w-3.5 h-3.5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/[0.08] border border-amber-500/20">
+              <svg className="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
               </svg>
-              <span className="text-sm font-semibold text-blue-300">{milestone.concept}</span>
+              <span className="text-sm font-semibold text-amber-300">{milestone.concept}</span>
             </div>
             {milestone.tags.map((tag) => (
               <span key={tag} className="text-xs px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/[0.07] text-slate-500">
@@ -183,7 +183,7 @@ export default function MilestoneConceptClient({ project, milestone, totalMilest
           {isLoading ? (
             <div className="space-y-4">
               <div className="flex items-center gap-3 text-slate-400 text-sm mb-8">
-                <svg className="w-4 h-4 animate-spin text-blue-400 flex-shrink-0" viewBox="0 0 24 24" fill="none">
+                <svg className="w-4 h-4 animate-spin text-amber-400 flex-shrink-0" viewBox="0 0 24 24" fill="none">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8h4z" />
                 </svg>
@@ -203,7 +203,7 @@ export default function MilestoneConceptClient({ project, milestone, totalMilest
               <p className="text-slate-500 text-sm mb-4">Couldn&apos;t load the concept guide. Please try again.</p>
               <button
                 onClick={() => { setError(false); setIsLoading(true); }}
-                className="text-xs text-blue-400 hover:text-blue-300 transition-colors"
+                className="text-xs text-amber-400 hover:text-amber-300 transition-colors"
               >
                 Retry
               </button>
@@ -229,7 +229,7 @@ export default function MilestoneConceptClient({ project, milestone, totalMilest
                   ),
                   li: ({ children }) => (
                     <li className="text-slate-400 text-[15px] leading-relaxed flex items-start gap-2">
-                      <span className="text-blue-400 mt-1.5 flex-shrink-0">·</span>
+                      <span className="text-amber-400 mt-1.5 flex-shrink-0">·</span>
                       <span>{children}</span>
                     </li>
                   ),
@@ -243,7 +243,7 @@ export default function MilestoneConceptClient({ project, milestone, totalMilest
                       );
                     }
                     return (
-                      <code className="text-sm font-mono text-blue-300 bg-blue-500/[0.1] border border-blue-500/20 px-1.5 py-0.5 rounded-md">
+                      <code className="text-sm font-mono text-amber-300 bg-amber-500/[0.1] border border-amber-500/20 px-1.5 py-0.5 rounded-md">
                         {children}
                       </code>
                     );
@@ -257,7 +257,7 @@ export default function MilestoneConceptClient({ project, milestone, totalMilest
                     <strong className="text-slate-200 font-semibold">{children}</strong>
                   ),
                   blockquote: ({ children }) => (
-                    <blockquote className="border-l-2 border-blue-500/40 pl-4 my-4 text-slate-500 italic text-sm">
+                    <blockquote className="border-l-2 border-amber-500/40 pl-4 my-4 text-slate-500 italic text-sm">
                       {children}
                     </blockquote>
                   ),

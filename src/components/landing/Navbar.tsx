@@ -7,8 +7,8 @@ import Image from "next/image";
 
 const NAV_LINKS = [
   { label: "Features", href: "#features" },
-  { label: "How It Works", href: "#how-it-works" },
-  { label: "Pricing", href: "#pricing" },
+  { label: "How it works", href: "#how-it-works" },
+  { label: "Compare", href: "#compare" },
 ];
 
 export default function Navbar() {
@@ -19,7 +19,7 @@ export default function Navbar() {
   useEffect(() => {
     gsap.fromTo(
       navRef.current,
-      { y: -20, opacity: 0 },
+      { y: -14, opacity: 0 },
       { y: 0, opacity: 1, duration: 0.5, ease: "power2.out", delay: 0.05 }
     );
 
@@ -31,35 +31,35 @@ export default function Navbar() {
   return (
     <nav
       ref={navRef}
-      className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${
+      className={`fixed top-0 inset-x-0 z-50 transition-colors duration-300 ${
         scrolled
-          ? "bg-[#07080f]/90 backdrop-blur-2xl border-b border-white/[0.07] shadow-xl shadow-black/40"
-          : "bg-gradient-to-b from-[#07080f]/70 to-transparent backdrop-blur-sm"
+          ? "bg-[rgba(11,10,9,0.72)] backdrop-blur-xl border-b border-[var(--border)]"
+          : "bg-transparent"
       }`}
     >
-      <div className="max-w-7xl mx-auto px-5 sm:px-8 h-[60px] flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-5 sm:px-8 h-[64px] flex items-center justify-between">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 shrink-0">
+        <Link href="/" className="flex items-center gap-2.5 shrink-0 group">
           <Image
             src="/logo-mark.png"
-            alt="Mentivo logo"
-            width={36}
-            height={36}
-            className="rounded-lg"
+            alt="Mentivo"
+            width={32}
+            height={32}
+            className="rounded-md"
             priority
           />
-          <span className="font-bold text-[15px] text-white tracking-[-0.02em]">
+          <span className="font-semibold text-[15px] text-stone-50 tracking-[-0.01em]">
             Mentivo
           </span>
         </Link>
 
         {/* Desktop nav */}
-        <div className="hidden md:flex items-center gap-1">
+        <div className="hidden md:flex items-center gap-7 absolute left-1/2 -translate-x-1/2">
           {NAV_LINKS.map((l) => (
             <Link
               key={l.label}
               href={l.href}
-              className="px-3.5 py-2 rounded-lg text-[13px] font-medium text-slate-400 hover:text-white hover:bg-white/5 transition-all"
+              className="text-[13.5px] font-medium text-stone-400 hover:text-stone-50 transition-colors"
             >
               {l.label}
             </Link>
@@ -70,15 +70,15 @@ export default function Navbar() {
         <div className="hidden md:flex items-center gap-2">
           <Link
             href="/signin"
-            className="px-4 py-2 text-[13px] font-medium text-slate-400 hover:text-white transition-colors"
+            className="px-3 py-2 text-[13.5px] font-medium text-stone-400 hover:text-stone-50 transition-colors"
           >
             Sign in
           </Link>
           <Link
             href="/signup"
-            className="btn-shimmer flex items-center gap-1.5 px-4 py-2 rounded-lg bg-blue-500 text-white text-[13px] font-semibold hover:bg-blue-400 transition-all shadow-md shadow-blue-500/20"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-[8px] bg-amber-500 text-stone-950 text-[13px] font-semibold hover:bg-amber-400 transition-colors"
           >
-            Start for free
+            Start free
             <svg
               className="w-3.5 h-3.5"
               fill="none"
@@ -98,7 +98,7 @@ export default function Navbar() {
         {/* Mobile hamburger */}
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
-          className="md:hidden p-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-all"
+          className="md:hidden p-2 rounded-lg text-stone-400 hover:text-stone-50 hover:bg-[var(--surface)] transition-colors"
           aria-label="Toggle menu"
         >
           <svg
@@ -128,29 +128,29 @@ export default function Navbar() {
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="md:hidden border-t border-white/[0.06] bg-[#07080f]/95 backdrop-blur-2xl px-5 py-4 space-y-1">
+        <div className="md:hidden border-t border-[var(--border)] bg-[rgba(11,10,9,0.95)] backdrop-blur-xl px-5 py-4 space-y-1">
           {NAV_LINKS.map((l) => (
             <Link
               key={l.label}
               href={l.href}
               onClick={() => setMobileOpen(false)}
-              className="block px-3 py-2.5 rounded-lg text-sm text-slate-400 hover:text-white hover:bg-white/5 transition-all"
+              className="block px-3 py-2.5 rounded-lg text-sm text-stone-400 hover:text-stone-50 hover:bg-[var(--surface)] transition-colors"
             >
               {l.label}
             </Link>
           ))}
-          <div className="pt-3 border-t border-white/[0.06] flex flex-col gap-2">
+          <div className="pt-3 border-t border-[var(--border)] flex flex-col gap-2">
             <Link
               href="/signin"
-              className="px-3 py-2.5 text-sm text-slate-400 hover:text-white transition-colors"
+              className="px-3 py-2.5 text-sm text-stone-400 hover:text-stone-50 transition-colors"
             >
               Sign in
             </Link>
             <Link
               href="/signup"
-              className="px-4 py-2.5 rounded-lg bg-blue-500 text-white text-sm font-semibold text-center"
+              className="px-4 py-2.5 rounded-[8px] bg-amber-500 text-stone-950 text-sm font-semibold text-center"
             >
-              Start for free
+              Start free
             </Link>
           </div>
         </div>

@@ -16,7 +16,7 @@ interface Project {
 }
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; dot: string }> = {
-  ONBOARDING: { label: "In Progress", color: "text-blue-400", dot: "bg-blue-400" },
+  ONBOARDING: { label: "In Progress", color: "text-amber-400", dot: "bg-amber-400" },
   QUIZ: { label: "Quiz", color: "text-orange-400", dot: "bg-orange-400 animate-pulse" },
   ACTIVE: { label: "Learning", color: "text-green-400", dot: "bg-green-400" },
   COMPLETED: { label: "Completed", color: "text-purple-400", dot: "bg-purple-400" },
@@ -121,8 +121,8 @@ export default function DashboardPage() {
 
   if (status === "loading") {
     return (
-      <div className="min-h-screen bg-[#07080f] flex items-center justify-center">
-        <svg className="w-6 h-6 animate-spin text-blue-400" viewBox="0 0 24 24" fill="none">
+      <div className="min-h-screen bg-[#0b0a09] flex items-center justify-center">
+        <svg className="w-6 h-6 animate-spin text-amber-400" viewBox="0 0 24 24" fill="none">
           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8h4z" />
         </svg>
@@ -137,7 +137,7 @@ export default function DashboardPage() {
   const initial = user.name?.charAt(0).toUpperCase() ?? "U";
 
   return (
-    <div className="min-h-screen bg-[#07080f]">
+    <div className="min-h-screen bg-[#0b0a09]">
       {/* Ambient glows */}
       <div
         aria-hidden
@@ -151,7 +151,7 @@ export default function DashboardPage() {
       />
 
       {/* Header */}
-      <header className="border-b border-white/[0.06] bg-[#07080f]/90 backdrop-blur-2xl sticky top-0 z-40">
+      <header className="border-b border-white/[0.06] bg-[#0b0a09]/90 backdrop-blur-2xl sticky top-0 z-40">
         <div className="max-w-5xl mx-auto px-5 sm:px-8 h-[60px] flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <Image src="/logo-mark.png" alt="Mentivo" width={30} height={30} className="rounded-lg" />
@@ -162,7 +162,7 @@ export default function DashboardPage() {
               {user.image ? (
                 <Image src={user.image} alt={user.name ?? "User"} width={22} height={22} className="rounded-full" />
               ) : (
-                <div className="w-[22px] h-[22px] rounded-full bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-[11px] font-semibold text-blue-400">
+                <div className="w-[22px] h-[22px] rounded-full bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-[11px] font-semibold text-amber-400">
                   {initial}
                 </div>
               )}
@@ -197,7 +197,7 @@ export default function DashboardPage() {
         {/* Idea Input Box */}
         <div className="max-w-2xl mx-auto mb-16">
           <form onSubmit={handleIdeaSubmit}>
-            <div className="relative rounded-2xl border border-white/[0.1] bg-white/[0.03] focus-within:border-blue-500/40 focus-within:bg-white/[0.04] transition-all duration-200"
+            <div className="relative rounded-2xl border border-white/[0.1] bg-white/[0.03] focus-within:border-amber-500/40 focus-within:bg-white/[0.04] transition-all duration-200"
               style={{ boxShadow: "0 0 0 1px transparent, 0 4px 32px rgba(0,0,0,0.3)" }}
             >
               <textarea
@@ -216,7 +216,7 @@ export default function DashboardPage() {
                 <button
                   type="submit"
                   disabled={!idea.trim() || isSubmitting}
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold transition-all duration-150 active:scale-95"
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold transition-all duration-150 active:scale-95"
                 >
                   {isSubmitting ? (
                     <>
@@ -298,7 +298,7 @@ export default function DashboardPage() {
                       className={`block p-5 rounded-2xl border transition-all duration-200 flex flex-col gap-3 ${
                         isDeleting
                           ? "opacity-40 pointer-events-none bg-white/[0.02] border-white/[0.07]"
-                          : "bg-white/[0.02] border-white/[0.07] hover:border-blue-500/30 hover:bg-white/[0.04]"
+                          : "bg-white/[0.02] border-white/[0.07] hover:border-amber-500/30 hover:bg-white/[0.04]"
                       }`}
                     >
                       <div className="flex items-start justify-between gap-2">
@@ -320,7 +320,7 @@ export default function DashboardPage() {
                           {new Date(project.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                         </span>
                         <svg
-                          className="w-4 h-4 text-slate-600 group-hover:text-blue-400 transition-colors"
+                          className="w-4 h-4 text-slate-600 group-hover:text-amber-400 transition-colors"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -337,7 +337,7 @@ export default function DashboardPage() {
                         className={`absolute top-3 right-3 z-10 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all duration-150 ${
                           isConfirming
                             ? "bg-red-500/20 border border-red-500/40 text-red-400 opacity-100"
-                            : "bg-[#07080f]/80 border border-white/[0.07] text-slate-500 hover:text-red-400 hover:border-red-500/30 hover:bg-red-500/[0.08] opacity-0 group-hover:opacity-100"
+                            : "bg-[#0b0a09]/80 border border-white/[0.07] text-slate-500 hover:text-red-400 hover:border-red-500/30 hover:bg-red-500/[0.08] opacity-0 group-hover:opacity-100"
                         }`}
                       >
                         {isConfirming ? (

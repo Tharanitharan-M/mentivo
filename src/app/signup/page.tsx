@@ -36,7 +36,6 @@ export default function SignUpPage() {
     if (Object.keys(errs).length) { setErrors(errs); return; }
     setLoading(true);
 
-    // Register user in the database
     const res = await fetch("/api/auth/signup", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -50,7 +49,6 @@ export default function SignUpPage() {
       return;
     }
 
-    // Auto sign-in after successful registration
     const result = await signIn("credentials", {
       email: form.email,
       password: form.password,
@@ -73,31 +71,33 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#07080f] dot-grid flex flex-col items-center justify-center px-4 py-16">
-      {/* Ambient glow */}
+    <div className="min-h-screen bg-[#0b0a09] dot-grid flex flex-col items-center justify-center px-4 py-16">
+      {/* Soft warm ambient */}
       <div
         aria-hidden
-        className="pointer-events-none fixed top-[-200px] left-1/2 -translate-x-1/2 w-[700px] h-[400px] rounded-full opacity-20"
+        className="pointer-events-none fixed top-[-200px] left-1/2 -translate-x-1/2 w-[700px] h-[400px] rounded-full"
         style={{
           background:
-            "radial-gradient(ellipse at center, #3b82f6 0%, transparent 70%)",
+            "radial-gradient(ellipse at center, rgba(245,158,11,0.18) 0%, transparent 70%)",
           filter: "blur(60px)",
         }}
       />
 
       <div className="w-full max-w-[420px] relative z-10">
         {/* Logo */}
-        <Link href="/" className="flex items-center justify-center gap-2 mb-8">
-          <Image src="/logo-mark.png" alt="Mentivo" width={36} height={36} className="rounded-lg" />
-          <span className="font-bold text-[17px] text-white tracking-[-0.02em]">Mentivo</span>
+        <Link href="/" className="flex items-center justify-center gap-2.5 mb-8">
+          <Image src="/logo-mark.png" alt="Mentivo" width={32} height={32} className="rounded-md" />
+          <span className="font-semibold text-[16px] text-stone-50 tracking-[-0.01em]">Mentivo</span>
         </Link>
 
         {/* Card */}
-        <div className="glass-card rounded-2xl p-8">
-          <h1 className="text-2xl font-bold text-white tracking-tight mb-1">Create your account</h1>
-          <p className="text-sm text-slate-400 mb-6">
+        <div className="surface-card rounded-2xl p-8">
+          <h1 className="text-[24px] font-semibold text-stone-50 tracking-[-0.02em] mb-1.5">
+            Create your account
+          </h1>
+          <p className="text-[14px] text-stone-400 mb-6">
             Already have one?{" "}
-            <Link href="/signin" className="text-blue-400 hover:text-blue-300 transition-colors font-medium">
+            <Link href="/signin" className="text-amber-400 hover:text-amber-300 transition-colors font-medium">
               Sign in
             </Link>
           </p>
@@ -106,21 +106,17 @@ export default function SignUpPage() {
           <button
             onClick={handleGoogle}
             disabled={googleLoading || loading}
-            className="w-full flex items-center justify-center gap-2.5 px-4 py-2.5 rounded-xl border border-white/10 bg-white/[0.04] hover:bg-white/[0.07] transition-all text-sm font-medium text-slate-200 disabled:opacity-50 disabled:cursor-not-allowed mb-5"
+            className="w-full flex items-center justify-center gap-2.5 px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--surface)] hover:bg-[var(--surface-2)] hover:border-[var(--border-2)] transition-colors text-[14px] font-medium text-stone-200 disabled:opacity-50 disabled:cursor-not-allowed mb-5"
           >
-            {googleLoading ? (
-              <Spinner />
-            ) : (
-              <GoogleIcon />
-            )}
+            {googleLoading ? <Spinner /> : <GoogleIcon />}
             Continue with Google
           </button>
 
           {/* Divider */}
           <div className="flex items-center gap-3 mb-5">
-            <div className="flex-1 hr-gradient" />
-            <span className="text-xs text-slate-500 font-medium">or</span>
-            <div className="flex-1 hr-gradient" />
+            <div className="flex-1 hairline" />
+            <span className="text-[11px] text-stone-500 font-medium tracking-[0.18em] uppercase">or</span>
+            <div className="flex-1 hairline" />
           </div>
 
           {/* Form */}
@@ -157,7 +153,7 @@ export default function SignUpPage() {
             />
 
             {errors.server && (
-              <p className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
+              <p className="text-[12px] text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
                 {errors.server}
               </p>
             )}
@@ -165,18 +161,18 @@ export default function SignUpPage() {
             <button
               type="submit"
               disabled={loading || googleLoading}
-              className="btn-shimmer w-full mt-1 py-2.5 rounded-xl bg-blue-500 hover:bg-blue-400 text-white text-sm font-semibold transition-all shadow-md shadow-blue-500/25 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="btn-primary btn-shimmer w-full justify-center mt-1 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? <Spinner /> : null}
               Create account
             </button>
           </form>
 
-          <p className="text-xs text-slate-500 text-center mt-5 leading-relaxed">
+          <p className="text-[11px] text-stone-600 text-center mt-5 leading-relaxed">
             By signing up you agree to our{" "}
-            <span className="text-slate-400 hover:text-slate-300 cursor-pointer transition-colors">Terms</span>{" "}
+            <span className="text-stone-400 hover:text-stone-200 cursor-pointer transition-colors">Terms</span>{" "}
             and{" "}
-            <span className="text-slate-400 hover:text-slate-300 cursor-pointer transition-colors">Privacy Policy</span>.
+            <span className="text-stone-400 hover:text-stone-200 cursor-pointer transition-colors">Privacy</span>.
           </p>
         </div>
       </div>
@@ -205,7 +201,7 @@ function Field({
 }) {
   return (
     <div>
-      <label className="block text-xs font-medium text-slate-300 mb-1.5">
+      <label className="block text-[12px] font-medium text-stone-300 mb-1.5">
         {label}
       </label>
       <input
@@ -215,13 +211,13 @@ function Field({
         value={value}
         onChange={onChange}
         autoComplete={autoComplete}
-        className={`w-full px-3.5 py-2.5 rounded-xl bg-white/[0.04] border text-sm text-white placeholder-slate-500 outline-none transition-all focus:bg-white/[0.06] ${
+        className={`w-full px-3.5 py-2.5 rounded-xl bg-[var(--surface)] border text-[14px] text-stone-50 placeholder-stone-600 outline-none transition-colors focus:bg-[var(--surface-2)] ${
           error
             ? "border-red-500/60 focus:border-red-400/80"
-            : "border-white/[0.08] focus:border-blue-500/60"
+            : "border-[var(--border)] focus:border-amber-500/50"
         }`}
       />
-      {error && <p className="mt-1.5 text-xs text-red-400">{error}</p>}
+      {error && <p className="mt-1.5 text-[12px] text-red-400">{error}</p>}
     </div>
   );
 }

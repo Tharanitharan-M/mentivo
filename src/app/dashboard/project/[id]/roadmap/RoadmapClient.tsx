@@ -34,9 +34,9 @@ const DIFFICULTY_STYLE: Record<string, { text: string; bg: string; border: strin
 };
 
 const LEVEL_GRADIENT: Record<string, string> = {
-  beginner:     "from-sky-400 to-blue-500",
+  beginner:     "from-stone-400 to-stone-500",
   intermediate: "from-orange-400 to-amber-500",
-  advanced:     "from-purple-400 to-violet-500",
+  advanced:     "from-orange-400 to-red-500",
 };
 
 function totalHours(milestones: Milestone[]): string {
@@ -142,7 +142,7 @@ export default function RoadmapClient({ project, milestones, userName: _userName
   }, []);
 
   return (
-    <div ref={containerRef} className="min-h-screen bg-[#07080f]">
+    <div ref={containerRef} className="min-h-screen bg-[#0b0a09]">
       {/* Ambient glows */}
       <div
         aria-hidden
@@ -156,7 +156,7 @@ export default function RoadmapClient({ project, milestones, userName: _userName
       />
 
       {/* ── Header ──────────────────────────────────────────────────── */}
-      <header className="border-b border-white/[0.06] bg-[#07080f]/90 backdrop-blur-2xl sticky top-0 z-40">
+      <header className="border-b border-white/[0.06] bg-[#0b0a09]/90 backdrop-blur-2xl sticky top-0 z-40">
         <div className="max-w-4xl mx-auto px-5 sm:px-8 h-[56px] flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link href="/dashboard" className="text-slate-500 hover:text-white transition-colors">
@@ -225,11 +225,11 @@ export default function RoadmapClient({ project, milestones, userName: _userName
 
       {/* ── Hero ────────────────────────────────────────────────────── */}
       <div ref={heroRef} className="max-w-4xl mx-auto px-5 sm:px-8 pt-14 pb-12 text-center relative z-10">
-        <div data-anim className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-blue-500/20 bg-blue-500/[0.07] mb-6">
-          <svg className="w-3 h-3 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div data-anim className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-amber-500/20 bg-amber-500/[0.07] mb-6">
+          <svg className="w-3 h-3 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
           </svg>
-          <span className="text-xs font-medium text-blue-400">Personalized Roadmap</span>
+          <span className="text-xs font-medium text-amber-400">Personalized Roadmap</span>
         </div>
 
         <h1 data-anim className="text-3xl sm:text-5xl font-black text-white tracking-tight mb-4 leading-tight">
@@ -266,7 +266,7 @@ export default function RoadmapClient({ project, milestones, userName: _userName
           {/* Vertical line */}
           <div
             ref={lineRef}
-            className="absolute left-6 sm:left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-blue-500/60 via-blue-500/20 to-transparent"
+            className="absolute left-6 sm:left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-amber-500/40 via-amber-500/15 to-transparent"
             style={{ transformOrigin: "top center" }}
           />
 
@@ -293,7 +293,7 @@ export default function RoadmapClient({ project, milestones, userName: _userName
                       isCompleted
                         ? "bg-green-500/10 border-green-500/40 text-green-400"
                         : isInProgress
-                        ? "bg-blue-500/10 border-blue-500/40 text-blue-400"
+                        ? "bg-amber-500/10 border-amber-500/40 text-amber-400"
                         : i === 0
                         ? `bg-gradient-to-br ${gradient} border-white/20 text-white shadow-lg`
                         : "bg-[#0d0f1a] border-white/[0.12] text-slate-400"
@@ -325,8 +325,8 @@ export default function RoadmapClient({ project, milestones, userName: _userName
                       isCompleted
                         ? "border-green-500/20 bg-green-500/[0.03] hover:border-green-500/30"
                         : isInProgress
-                        ? "border-blue-500/20 bg-blue-500/[0.03] hover:border-blue-500/30"
-                        : "border-white/[0.07] bg-white/[0.02] hover:border-blue-500/25 hover:bg-white/[0.035]"
+                        ? "border-amber-500/20 bg-amber-500/[0.03] hover:border-amber-500/30"
+                        : "border-white/[0.07] bg-white/[0.02] hover:border-amber-500/25 hover:bg-white/[0.035]"
                     }`}>
                       {/* Top accent line */}
                       <div className={`h-[2px] w-full ${isCompleted ? "bg-gradient-to-r from-green-400 to-emerald-500" : `bg-gradient-to-r ${gradient} opacity-40`}`} />
@@ -348,7 +348,7 @@ export default function RoadmapClient({ project, milestones, userName: _userName
                                 </span>
                               )}
                               {isInProgress && (
-                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-blue-500/10 border-blue-500/25 text-blue-400">
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-amber-500/10 border-amber-500/25 text-amber-400">
                                   In Progress
                                 </span>
                               )}
@@ -369,11 +369,11 @@ export default function RoadmapClient({ project, milestones, userName: _userName
 
                         {/* Concept badge */}
                         <div className="flex items-center gap-2 mb-3">
-                          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-500/[0.08] border border-blue-500/20">
-                            <svg className="w-3 h-3 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-500/[0.08] border border-amber-500/20">
+                            <svg className="w-3 h-3 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                             </svg>
-                            <span className="text-xs font-semibold text-blue-300">{milestone.concept}</span>
+                            <span className="text-xs font-semibold text-amber-300">{milestone.concept}</span>
                           </div>
                         </div>
 
@@ -408,7 +408,7 @@ export default function RoadmapClient({ project, milestones, userName: _userName
                             className={`flex items-center justify-between w-full px-4 py-2.5 rounded-xl border transition-all ${
                               isCompleted
                                 ? "bg-green-500/[0.07] border-green-500/20 hover:bg-green-500/[0.12]"
-                                : `bg-gradient-to-r ${gradient} bg-opacity-10 border-white/[0.08] group-hover:border-blue-500/20`
+                                : `bg-gradient-to-r ${gradient} bg-opacity-10 border-white/[0.08] group-hover:border-amber-500/20`
                             }`}
                           >
                             <span className={`text-sm font-semibold ${isCompleted ? "text-green-300" : "text-white"}`}>

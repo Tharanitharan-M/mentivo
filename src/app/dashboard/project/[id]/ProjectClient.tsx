@@ -57,7 +57,7 @@ function TypingDots() {
 
 function MentivoAvatar() {
   return (
-    <div className="w-7 h-7 rounded-lg bg-blue-600/20 border border-blue-500/30 flex items-center justify-center flex-shrink-0">
+    <div className="w-7 h-7 rounded-lg bg-amber-500/20 border border-amber-500/30 flex items-center justify-center flex-shrink-0">
       <Image src="/logo-mark.png" alt="Mentivo" width={16} height={16} className="rounded-sm" />
     </div>
   );
@@ -198,7 +198,7 @@ export default function ProjectClient({
   }
 
   return (
-    <div className="min-h-screen bg-[#07080f] flex flex-col">
+    <div className="min-h-screen bg-[#0b0a09] flex flex-col">
       {/* Ambient glow */}
       <div
         aria-hidden
@@ -210,7 +210,7 @@ export default function ProjectClient({
       />
 
       {/* Header */}
-      <header className="border-b border-white/[0.06] bg-[#07080f]/90 backdrop-blur-2xl sticky top-0 z-40 flex-shrink-0">
+      <header className="border-b border-white/[0.06] bg-[#0b0a09]/90 backdrop-blur-2xl sticky top-0 z-40 flex-shrink-0">
         <div className="max-w-3xl mx-auto px-5 sm:px-8 h-[56px] flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link href="/dashboard" className="text-slate-500 hover:text-white transition-colors">
@@ -225,7 +225,7 @@ export default function ProjectClient({
             </Link>
           </div>
           <div className="flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
             <span className="text-xs text-slate-500 font-medium hidden sm:block">Understanding your project</span>
           </div>
         </div>
@@ -236,7 +236,7 @@ export default function ProjectClient({
         <div className="max-w-3xl mx-auto px-5 sm:px-8 py-2.5">
           <div className="flex items-start gap-2">
             <svg
-              className="w-3.5 h-3.5 text-blue-400 mt-0.5 flex-shrink-0"
+              className="w-3.5 h-3.5 text-amber-400 mt-0.5 flex-shrink-0"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -271,7 +271,7 @@ export default function ProjectClient({
                 <div
                   className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap ${
                     isUser
-                      ? "bg-blue-600/20 border border-blue-500/20 text-slate-200 rounded-tr-sm"
+                      ? "bg-amber-500/20 border border-amber-500/20 text-slate-200 rounded-tr-sm"
                       : "bg-white/[0.04] border border-white/[0.07] text-slate-200 rounded-tl-sm"
                   }`}
                 >
@@ -288,7 +288,7 @@ export default function ProjectClient({
                 {isGeneratingQuiz ? (
                   <div className="px-4 py-3 flex items-center gap-2.5 text-sm text-slate-400">
                     <svg
-                      className="w-3.5 h-3.5 animate-spin text-blue-400 flex-shrink-0"
+                      className="w-3.5 h-3.5 animate-spin text-amber-400 flex-shrink-0"
                       viewBox="0 0 24 24"
                       fill="none"
                     >
@@ -313,9 +313,9 @@ export default function ProjectClient({
       </div>
 
       {/* Input */}
-      <div className="border-t border-white/[0.06] bg-[#07080f]/95 backdrop-blur-xl flex-shrink-0">
+      <div className="border-t border-white/[0.06] bg-[#0b0a09]/95 backdrop-blur-xl flex-shrink-0">
         <div className="max-w-3xl mx-auto px-5 sm:px-8 py-4">
-          <div className="relative flex items-center gap-3 rounded-xl border border-white/[0.08] bg-white/[0.03] focus-within:border-blue-500/30 transition-colors px-4 py-3">
+          <div className="relative flex items-center gap-3 rounded-xl border border-white/[0.08] bg-white/[0.03] focus-within:border-amber-500/30 transition-colors px-4 py-3">
             <input
               ref={inputRef}
               value={inputValue}
@@ -328,7 +328,7 @@ export default function ProjectClient({
             <button
               onClick={handleSend}
               disabled={!inputValue.trim() || isLoading || isGeneratingQuiz}
-              className="flex-shrink-0 w-8 h-8 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-all active:scale-95"
+              className="flex-shrink-0 w-8 h-8 rounded-lg bg-amber-500 hover:bg-amber-500 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-all active:scale-95"
             >
               <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
