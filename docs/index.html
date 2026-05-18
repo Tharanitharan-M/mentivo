@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Mentivo &mdash; an AI mentor that won't write the code for you</title>
 <meta name="description" content="The story behind Mentivo: why I built it, how it works, what's under the hood, and where it's going." />
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23d97706'/%3E%3Ctext x='50%25' y='56%25' text-anchor='middle' font-family='-apple-system,BlinkMacSystemFont,sans-serif' font-size='18' font-weight='700' fill='%23ffffff'%3EM%3C/text%3E%3C/svg%3E" />
+<link rel="icon" type="image/png" href="logo.png" />
+<link rel="apple-touch-icon" href="logo.png" />
 <style>
   :root {
     --bg: #fafaf7;
@@ -43,8 +44,76 @@
     text-rendering: optimizeLegibility;
   }
 
-  a { color: var(--accent-hi); text-decoration: none; border-bottom: 1px solid transparent; transition: border-color 140ms ease; }
-  a:hover { border-bottom-color: var(--accent-hi); }
+  a:not(.btn) { color: var(--accent-hi); text-decoration: none; border-bottom: 1px solid transparent; transition: border-color 140ms ease; }
+  a:not(.btn):hover { border-bottom-color: var(--accent-hi); }
+
+  /* ─── Hero CTA buttons ─────────────────────────────── */
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 26px 0 22px;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 10px 16px;
+    border-radius: 8px;
+    text-decoration: none;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: background 140ms ease, color 140ms ease,
+                border-color 140ms ease, transform 140ms ease,
+                box-shadow 140ms ease;
+  }
+  .btn:hover {
+    transform: translateY(-1px);
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #ffffff;
+    border-color: var(--accent);
+    box-shadow: 0 1px 2px rgba(217, 119, 6, 0.18),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  }
+  .btn-primary:hover {
+    background: var(--accent-hi);
+    border-color: var(--accent-hi);
+    box-shadow: 0 4px 12px rgba(217, 119, 6, 0.22),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  }
+  .btn-secondary {
+    background: var(--surface);
+    color: var(--text-1);
+    border-color: var(--border-2);
+  }
+  .btn-secondary:hover {
+    background: #ffffff;
+    border-color: var(--text-3);
+  }
+  .btn-icon {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+  }
+  .btn-pulse {
+    position: relative;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #fef9c3;
+    box-shadow: 0 0 0 0 rgba(254, 249, 195, 0.7);
+    animation: btn-pulse 2.4s ease-out infinite;
+  }
+  @keyframes btn-pulse {
+    0% { box-shadow: 0 0 0 0 rgba(254, 249, 195, 0.7); }
+    70% { box-shadow: 0 0 0 7px rgba(254, 249, 195, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(254, 249, 195, 0); }
+  }
 
   code, pre, .mono {
     font-family: "SF Mono", "Monaco", "Cascadia Code", "Roboto Mono", "Consolas", monospace;
@@ -106,15 +175,10 @@
     border: 0;
   }
   .logo-mark {
-    width: 22px;
     height: 22px;
-    border-radius: 6px;
-    background: var(--accent);
-    display: inline-grid;
-    place-items: center;
-    color: #fff;
-    font-size: 11px;
-    font-weight: 700;
+    width: auto;
+    display: block;
+    border-radius: 4px;
   }
   .topbar nav {
     margin-left: auto;
@@ -503,6 +567,141 @@
     section { page-break-inside: avoid; margin-top: 32px; }
     pre { font-size: 11px; }
   }
+
+  /* ─── Interactive architecture diagram ────────────────── */
+  .arch-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 22px;
+  }
+  .arch-chip {
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-2);
+    cursor: pointer;
+    transition: background 140ms ease, border-color 140ms ease, color 140ms ease;
+  }
+  .arch-chip:hover {
+    background: var(--surface-2);
+    border-color: var(--border-2);
+    color: var(--text-1);
+  }
+  .arch-chip.is-active {
+    background: var(--accent-soft);
+    border-color: var(--accent-line);
+    color: var(--accent-hi);
+  }
+  .arch-hint {
+    font-size: 13px;
+    color: var(--text-3);
+    margin-top: 8px;
+    margin-bottom: 0;
+  }
+  .arch-interactive {
+    margin-top: 14px;
+    padding: 28px 18px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow-x: auto;
+  }
+  .arch-interactive svg {
+    width: 100%;
+    height: auto;
+    display: block;
+    max-width: 820px;
+    margin: 0 auto;
+  }
+
+  /* Container (Vercel app boundary) */
+  .arch-container {
+    fill: #ffffff;
+    stroke: var(--border-2);
+    stroke-width: 1.2;
+    stroke-dasharray: 5 4;
+  }
+  .arch-container-label {
+    font-family: inherit;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    fill: var(--text-3);
+  }
+
+  /* Nodes */
+  .arch-node {
+    cursor: pointer;
+  }
+  .arch-node rect {
+    fill: #ffffff;
+    stroke: var(--border-2);
+    stroke-width: 1.4;
+    transition: fill 200ms ease, stroke 200ms ease, stroke-width 200ms ease, opacity 200ms ease;
+  }
+  .arch-node text {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 13px;
+    fill: var(--text-1);
+    text-anchor: middle;
+    pointer-events: none;
+    user-select: none;
+    transition: fill 200ms ease;
+  }
+  .arch-node .node-sub {
+    font-size: 10.5px;
+    fill: var(--text-3);
+    font-weight: 400;
+  }
+  .arch-node:hover rect {
+    stroke: var(--text-3);
+  }
+
+  /* Active node = part of the highlighted flow */
+  .arch-node.is-active rect {
+    fill: var(--accent-soft);
+    stroke: var(--accent);
+    stroke-width: 2;
+  }
+  .arch-node.is-active .node-sub {
+    fill: var(--accent-hi);
+  }
+
+  /* Dimmed node = not on the highlighted flow */
+  .arch-node.is-dimmed {
+    opacity: 0.28;
+  }
+
+  /* Edges (arrows) */
+  .arch-edge {
+    stroke: #a8a29e;
+    stroke-width: 1.4;
+    fill: none;
+    transition: stroke 200ms ease, stroke-width 200ms ease, opacity 200ms ease;
+  }
+  .arch-edge.dashed {
+    stroke-dasharray: 5 4;
+  }
+  .arch-edge.is-active {
+    stroke: var(--accent);
+    stroke-width: 2.4;
+    marker-end: url(#arrow-active);
+  }
+  .arch-edge.is-dimmed {
+    opacity: 0.18;
+  }
+
+  @media (max-width: 720px) {
+    .arch-interactive { padding: 14px 6px; }
+    .arch-node text { font-size: 12px; }
+    .arch-node .node-sub { font-size: 9.5px; }
+  }
 </style>
 </head>
 <body>
@@ -510,7 +709,7 @@
 <header class="topbar">
   <div class="topbar-inner">
     <a href="#top" class="logo">
-      <span class="logo-mark">M</span>
+      <img src="logo.png" alt="" class="logo-mark" width="33" height="22" />
       Mentivo
     </a>
     <nav>
@@ -536,6 +735,23 @@
     you built before letting you move on. It will not generate the code on
     your behalf. That is the whole point.
   </p>
+
+  <div class="hero-actions">
+    <a href="https://mentivo-flame.vercel.app/" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
+      <span class="btn-pulse" aria-hidden="true"></span>
+      Try the live app
+      <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M7 17L17 7M9 7h8v8" />
+      </svg>
+    </a>
+    <a href="https://github.com/Tharanitharan-M/mentivo" target="_blank" rel="noopener noreferrer" class="btn btn-secondary">
+      <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+      </svg>
+      Source on GitHub
+    </a>
+  </div>
+
   <div class="tags">
     <span class="tag accent">TypeScript</span>
     <span class="tag accent">Next.js&nbsp;16</span>
@@ -906,51 +1122,139 @@
       Langfuse. Everything that runs over the network is on one host.
     </p>
 
-    <div class="arch">
-<pre>
-                          <span class="b">Browser</span>
-                ┌─────────────────────────┐
-                │  Next.js (RSC + client) │
-                │  GSAP · Monaco editor   │
-                └────────────┬────────────┘
-                             │  fetch / streaming
-                             ▼
-        ┌────────────────────────────────────────────┐
-        │            <span class="b">Next.js App on Vercel</span>           │
-        │                                            │
-        │  ┌──────────────┐    ┌──────────────────┐  │
-        │  │ Server Pages │    │   API Routes     │  │
-        │  │   (RSC)      │    │  (Node runtime)  │  │
-        │  └──────────────┘    └────────┬─────────┘  │
-        │                               │            │
-        │   <span class="d">Rate limiter → Auth → Schema check</span>     │
-        └───────────────────────────────┼────────────┘
-                                        │
-            ┌───────────────────┬───────┴─────────┬──────────────────┐
-            ▼                   ▼                 ▼                  ▼
-     ┌────────────┐      ┌──────────────┐   ┌───────────┐      ┌──────────┐
-     │  NextAuth  │      │ <span class="a">Vercel AI SDK</span>│   │  Prisma   │      │ Logger / │
-     │ + Google   │      │  streamText  │   │  + Neon   │      │ Errors   │
-     └────────────┘      │ generateObj. │   │  Postgres │      └──────────┘
-                         └──────┬───────┘   └───────────┘
-                                │
-                ┌───────────────┴───────────────┐
-                ▼                               ▼
-        ┌──────────────┐                ┌────────────────┐
-        │ Google Gemini│                │ OTel exporter  │
-        │ 2.5-flash    │                │  ↓             │
-        └──────────────┘                │ <span class="a">Langfuse</span>       │
-                                        │ (per-call      │
-                                        │  traces +      │
-                                        │  prompt ver.)  │
-                                        └────────────────┘
+    <!-- Scenario chips -->
+    <div class="arch-controls" role="tablist" aria-label="Architecture scenarios">
+      <button type="button" data-flow="all" class="arch-chip">Everything</button>
+      <button type="button" data-flow="ai" class="arch-chip is-active">AI request flow</button>
+      <button type="button" data-flow="persistence" class="arch-chip">Persistence</button>
+      <button type="button" data-flow="auth" class="arch-chip">Auth check</button>
+      <button type="button" data-flow="obs" class="arch-chip">Observability</button>
+      <button type="button" data-flow="eval" class="arch-chip">Offline evals</button>
+    </div>
+    <p class="arch-hint">
+      Click a scenario above, or click any box to see the flow it&rsquo;s part of.
+      Defaults to the typical AI request path.
+    </p>
 
-   <span class="d">Offline / CI:</span>
-   ┌──────────────────────────────────────────────────────┐
-   │ <span class="a">promptfoo</span> evals · roadmap · quiz · milestone-starter │
-   │   programmatic asserts  +  llm-rubric quality        │
-   └──────────────────────────────────────────────────────┘
-</pre>
+    <div class="arch-interactive">
+      <svg viewBox="0 0 800 720" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mentivo system architecture">
+        <defs>
+          <marker id="arrow-default" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#a8a29e" />
+          </marker>
+          <marker id="arrow-active" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#d97706" />
+          </marker>
+        </defs>
+
+        <!-- ─── Container: Next.js App on Vercel ─── -->
+        <rect class="arch-container" x="10" y="120" width="760" height="140" rx="10" />
+        <text class="arch-container-label" x="400" y="138" text-anchor="middle">Next.js App on Vercel</text>
+
+        <!-- ─── Edges (drawn before nodes so nodes overlay them) ─── -->
+        <path class="arch-edge" data-id="e-browser-app" d="M 400 80 L 410 155" marker-end="url(#arrow-default)" />
+
+        <path class="arch-edge" data-id="e-api-auth"   d="M 410 225 C 410 260, 100 260, 100 300" marker-end="url(#arrow-default)" />
+        <path class="arch-edge" data-id="e-api-sdk"    d="M 410 225 C 410 270, 300 270, 300 300" marker-end="url(#arrow-default)" />
+        <path class="arch-edge" data-id="e-api-prisma" d="M 410 225 C 410 270, 500 270, 500 300" marker-end="url(#arrow-default)" />
+        <path class="arch-edge" data-id="e-api-logger" d="M 410 225 C 410 260, 680 260, 680 300" marker-end="url(#arrow-default)" />
+
+        <path class="arch-edge" data-id="e-sdk-gemini" d="M 300 380 C 300 420, 200 420, 200 460" marker-end="url(#arrow-default)" />
+        <path class="arch-edge" data-id="e-sdk-otel"   d="M 300 380 C 300 420, 360 420, 360 460" marker-end="url(#arrow-default)" />
+        <path class="arch-edge" data-id="e-prisma-neon" d="M 500 380 C 500 420, 530 420, 530 460" marker-end="url(#arrow-default)" />
+
+        <path class="arch-edge" data-id="e-otel-langfuse" d="M 360 530 L 360 590" marker-end="url(#arrow-default)" />
+
+        <path class="arch-edge dashed" data-id="e-promptfoo-sdk" d="M 690 460 C 600 410, 500 360, 400 340" marker-end="url(#arrow-default)" />
+
+        <!-- ─── Nodes ─── -->
+
+        <g class="arch-node" data-id="browser">
+          <rect x="320" y="20" width="160" height="60" rx="8" />
+          <text x="400" y="46" font-weight="600">Browser</text>
+          <text x="400" y="64" class="node-sub">Next.js · Monaco · GSAP</text>
+        </g>
+
+        <g class="arch-node" data-id="pages">
+          <rect x="50" y="155" width="180" height="70" rx="8" />
+          <text x="140" y="183" font-weight="600">Server Pages</text>
+          <text x="140" y="202" class="node-sub">React Server Components</text>
+        </g>
+
+        <g class="arch-node" data-id="api">
+          <rect x="320" y="155" width="180" height="70" rx="8" />
+          <text x="410" y="183" font-weight="600">API Routes</text>
+          <text x="410" y="202" class="node-sub">Node runtime</text>
+        </g>
+
+        <g class="arch-node" data-id="middleware">
+          <rect x="590" y="155" width="180" height="70" rx="8" />
+          <text x="680" y="180" font-weight="600">Middleware</text>
+          <text x="680" y="198" class="node-sub">Rate limit · Auth check</text>
+          <text x="680" y="214" class="node-sub">Schema validation</text>
+        </g>
+
+        <g class="arch-node" data-id="auth">
+          <rect x="20" y="300" width="160" height="80" rx="8" />
+          <text x="100" y="330" font-weight="600">NextAuth v5</text>
+          <text x="100" y="350" class="node-sub">Credentials</text>
+          <text x="100" y="366" class="node-sub">+ Google OAuth</text>
+        </g>
+
+        <g class="arch-node arch-node--accent" data-id="sdk">
+          <rect x="200" y="300" width="200" height="80" rx="8" />
+          <text x="300" y="328" font-weight="600">Vercel AI SDK</text>
+          <text x="300" y="348" class="node-sub">streamText</text>
+          <text x="300" y="364" class="node-sub">generateObject</text>
+        </g>
+
+        <g class="arch-node" data-id="prisma">
+          <rect x="420" y="300" width="160" height="80" rx="8" />
+          <text x="500" y="330" font-weight="600">Prisma ORM</text>
+          <text x="500" y="350" class="node-sub">Typed queries</text>
+          <text x="500" y="366" class="node-sub">Migrations</text>
+        </g>
+
+        <g class="arch-node" data-id="logger">
+          <rect x="600" y="300" width="160" height="80" rx="8" />
+          <text x="680" y="330" font-weight="600">Logger / Errors</text>
+          <text x="680" y="350" class="node-sub">Structured JSON</text>
+          <text x="680" y="366" class="node-sub">AIGenerationError</text>
+        </g>
+
+        <g class="arch-node arch-node--accent" data-id="gemini">
+          <rect x="130" y="460" width="140" height="70" rx="8" />
+          <text x="200" y="488" font-weight="600">Google Gemini</text>
+          <text x="200" y="508" class="node-sub">2.5-flash</text>
+        </g>
+
+        <g class="arch-node arch-node--accent" data-id="otel">
+          <rect x="290" y="460" width="140" height="70" rx="8" />
+          <text x="360" y="488" font-weight="600">OpenTelemetry</text>
+          <text x="360" y="508" class="node-sub">exporter</text>
+        </g>
+
+        <g class="arch-node" data-id="neon">
+          <rect x="460" y="460" width="140" height="70" rx="8" />
+          <text x="530" y="488" font-weight="600">Neon Postgres</text>
+          <text x="530" y="508" class="node-sub">serverless driver</text>
+        </g>
+
+        <g class="arch-node arch-node--accent" data-id="langfuse">
+          <rect x="290" y="590" width="140" height="70" rx="8" />
+          <text x="360" y="618" font-weight="600">Langfuse</text>
+          <text x="360" y="638" class="node-sub">per-call traces</text>
+        </g>
+
+        <g class="arch-node arch-node--accent" data-id="promptfoo">
+          <rect x="610" y="460" width="160" height="120" rx="8" />
+          <text x="690" y="488" font-weight="600">promptfoo</text>
+          <text x="690" y="508" class="node-sub">roadmap · quiz</text>
+          <text x="690" y="524" class="node-sub">milestone-starter</text>
+          <text x="690" y="548" class="node-sub" font-style="italic">JS asserts</text>
+          <text x="690" y="564" class="node-sub" font-style="italic">+ llm-rubric</text>
+        </g>
+      </svg>
     </div>
   </section>
 
@@ -1301,6 +1605,103 @@ return result.toUIMessageStreamResponse();</pre>
   </footer>
 
 </main>
+
+<script>
+  // ─── Interactive architecture diagram ──────────────────────
+  // Each "flow" is a set of node ids + edge ids that get highlighted.
+  // Clicking a node maps to one of these flows.
+  (function () {
+    // Note on Middleware: rate limit + auth + schema check runs at the
+    // top of every API route. Any flow that passes through `api` also
+    // passes through `middleware` — so it lights up on ai/persistence/auth.
+    const FLOWS = {
+      ai: {
+        nodes: ["browser", "api", "middleware", "sdk", "gemini", "otel", "langfuse"],
+        edges: ["e-browser-app", "e-api-sdk", "e-sdk-gemini", "e-sdk-otel", "e-otel-langfuse"],
+      },
+      persistence: {
+        nodes: ["browser", "api", "middleware", "prisma", "neon"],
+        edges: ["e-browser-app", "e-api-prisma", "e-prisma-neon"],
+      },
+      auth: {
+        nodes: ["browser", "api", "middleware", "auth"],
+        edges: ["e-browser-app", "e-api-auth"],
+      },
+      obs: {
+        nodes: ["sdk", "otel", "langfuse"],
+        edges: ["e-sdk-otel", "e-otel-langfuse"],
+      },
+      eval: {
+        nodes: ["promptfoo", "sdk"],
+        edges: ["e-promptfoo-sdk"],
+      },
+      all: null, // "Everything" — clear all highlighting
+    };
+
+    // Clicking a node activates the flow that most centrally involves it.
+    const NODE_TO_FLOW = {
+      browser: "ai",
+      pages: "ai",
+      api: "ai",
+      middleware: "auth",
+      sdk: "ai",
+      gemini: "ai",
+      otel: "obs",
+      langfuse: "obs",
+      prisma: "persistence",
+      neon: "persistence",
+      auth: "auth",
+      logger: "all",
+      promptfoo: "eval",
+    };
+
+    const nodes = document.querySelectorAll(".arch-node");
+    const edges = document.querySelectorAll(".arch-edge");
+    const chips = document.querySelectorAll(".arch-chip");
+
+    function applyFlow(flowKey) {
+      const flow = FLOWS[flowKey];
+
+      // "Everything" → strip all is-active / is-dimmed classes.
+      if (flow === null) {
+        nodes.forEach(n => n.classList.remove("is-active", "is-dimmed"));
+        edges.forEach(e => e.classList.remove("is-active", "is-dimmed"));
+      } else {
+        nodes.forEach(n => {
+          const id = n.dataset.id;
+          const onPath = flow.nodes.includes(id);
+          n.classList.toggle("is-active", onPath);
+          n.classList.toggle("is-dimmed", !onPath);
+        });
+        edges.forEach(e => {
+          const id = e.dataset.id;
+          const onPath = flow.edges.includes(id);
+          e.classList.toggle("is-active", onPath);
+          e.classList.toggle("is-dimmed", !onPath);
+        });
+      }
+
+      chips.forEach(c => {
+        c.classList.toggle("is-active", c.dataset.flow === flowKey);
+      });
+    }
+
+    chips.forEach(chip => {
+      chip.addEventListener("click", () => applyFlow(chip.dataset.flow));
+    });
+
+    nodes.forEach(node => {
+      node.addEventListener("click", () => {
+        const flowKey = NODE_TO_FLOW[node.dataset.id] ?? "all";
+        applyFlow(flowKey);
+      });
+    });
+
+    // Initial state — show the AI request flow so the page lands on the
+    // most important story.
+    applyFlow("ai");
+  })();
+</script>
 
 </body>
 </html>
