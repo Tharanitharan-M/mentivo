@@ -249,7 +249,7 @@ export default function MilestoneConceptClient({ project, milestone, totalMilest
                     );
                   },
                   pre: ({ children }) => (
-                    <pre className="bg-[#0d0f1a] border border-white/[0.08] rounded-xl p-5 overflow-x-auto my-5 text-sm">
+                    <pre className="bg-[#131110] border border-white/[0.08] rounded-xl p-5 overflow-x-auto my-5 text-sm">
                       {children}
                     </pre>
                   ),

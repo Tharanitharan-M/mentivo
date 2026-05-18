@@ -185,7 +185,7 @@ export default function RoadmapClient({ project, milestones, userName: _userName
       {/* Re-create roadmap confirmation modal */}
       {showRecreateConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="bg-[#0d0f1a] border border-white/[0.1] rounded-2xl p-6 max-w-md w-full shadow-xl">
+          <div className="bg-[#131110] border border-white/[0.1] rounded-2xl p-6 max-w-md w-full shadow-xl">
             <h3 className="text-lg font-bold text-white mb-2">Re-create roadmap?</h3>
             <p className="text-slate-400 text-sm leading-relaxed mb-6">
               This will clear your current roadmap, quiz result, and conversation. You’ll start over with your app idea and get a new quiz and roadmap. This can’t be undone.
@@ -296,7 +296,7 @@ export default function RoadmapClient({ project, milestones, userName: _userName
                         ? "bg-amber-500/10 border-amber-500/40 text-amber-400"
                         : i === 0
                         ? `bg-gradient-to-br ${gradient} border-white/20 text-white shadow-lg`
-                        : "bg-[#0d0f1a] border-white/[0.12] text-slate-400"
+                        : "bg-[#131110] border-white/[0.12] text-slate-400"
                     }`}
                   >
                     {isCompleted ? (

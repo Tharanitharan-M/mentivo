@@ -12,7 +12,7 @@ import type { UIMessage } from "ai";
 
 const Editor = dynamic(() => import("@monaco-editor/react"), {
   ssr: false,
-  loading: () => <div className="w-full h-full bg-[#1e1e1e] flex items-center justify-center"><span className="text-slate-600 text-sm">Loading editor…</span></div>,
+  loading: () => <div className="w-full h-full bg-[#131110] flex items-center justify-center"><span className="text-slate-600 text-sm">Loading editor…</span></div>,
 });
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -536,7 +536,7 @@ export default function WorkspaceClient({
       {/* Reset milestone confirmation modal */}
       {showResetConfirm && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="bg-[#0d0f1a] border border-white/[0.1] rounded-2xl p-6 max-w-md w-full shadow-xl">
+          <div className="bg-[#131110] border border-white/[0.1] rounded-2xl p-6 max-w-md w-full shadow-xl">
             <h3 className="text-lg font-bold text-white mb-2">Reset this milestone?</h3>
             <p className="text-slate-400 text-sm leading-relaxed mb-6">
               Your code and task progress will be reset to the original starter. Your chat history in this milestone will be cleared. You can start coding again from scratch.
@@ -587,7 +587,7 @@ export default function WorkspaceClient({
         </div>
       )}
       {/* ── Header ─────────────────────────────────────────────────── */}
-      <header className="h-12 flex-shrink-0 border-b border-white/[0.07] bg-[#0b0d14] flex items-center px-3 gap-3 z-30">
+      <header className="h-12 flex-shrink-0 border-b border-white/[0.07] bg-[#131110] flex items-center px-3 gap-3 z-30">
         <div className="flex items-center gap-2 flex-shrink-0">
           <Link href={`/dashboard/project/${project.id}/roadmap`} className="text-slate-500 hover:text-white transition-colors p-1">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -656,7 +656,7 @@ export default function WorkspaceClient({
       </header>
 
       {/* ── Mobile tab bar ─────────────────────────────────────────── */}
-      <div className="lg:hidden flex border-b border-white/[0.07] bg-[#0b0d14] flex-shrink-0">
+      <div className="lg:hidden flex border-b border-white/[0.07] bg-[#131110] flex-shrink-0">
         {(["learn", "code", "preview", "chat"] as MobileTab[]).map((tab) => (
           <button key={tab} onClick={() => setMobileTab(tab)}
             className={`flex-1 py-2 text-[11px] font-semibold uppercase tracking-wider transition-colors ${mobileTab === tab ? "text-white border-b-2 border-amber-400" : "text-slate-600"}`}>
@@ -719,7 +719,7 @@ export default function WorkspaceClient({
                         <p className="text-[13px] text-slate-300 leading-relaxed mb-4">{children}</p>
                       ),
                       pre: ({ children }) => (
-                        <pre className="bg-[#0d0f1a] border border-white/[0.08] rounded-xl p-4 overflow-x-auto my-4 text-[12px] font-mono leading-relaxed">
+                        <pre className="bg-[#131110] border border-white/[0.08] rounded-xl p-4 overflow-x-auto my-4 text-[12px] font-mono leading-relaxed">
                           {children}
                         </pre>
                       ),
@@ -871,7 +871,7 @@ export default function WorkspaceClient({
 
         {/* CENTER: File tree + Editor ──────────────────────────────────────────── */}
         <div className={`flex flex-col flex-1 min-w-0 min-h-0 ${mobileTab === "code" ? "flex" : "hidden lg:flex"}`}>
-          <div className="h-9 flex-shrink-0 flex items-center border-b border-white/[0.07] bg-[#0d0f1a]">
+          <div className="h-9 flex-shrink-0 flex items-center border-b border-white/[0.07] bg-[#131110]">
             {/* File tree */}
             <div className="flex items-center gap-0.5 px-2 min-w-0 flex-1 overflow-x-auto">
               {Object.keys(files).map((name) => (
@@ -880,7 +880,7 @@ export default function WorkspaceClient({
                   onClick={() => setActiveFile(name)}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-t-md border border-b-0 text-[11px] font-medium transition-colors flex-shrink-0 ${
                     activeFile === name
-                      ? "bg-[#1e1e2e] border-white/[0.07] text-slate-200"
+                      ? "bg-[#1a1716] border-white/[0.07] text-slate-200"
                       : "border-transparent text-slate-500 hover:text-slate-400 hover:bg-white/[0.04]"
                   }`}
                 >
@@ -941,7 +941,7 @@ export default function WorkspaceClient({
 
           <div className="flex-1 min-h-0 relative">
             {isStarterLoading && (
-              <div className="absolute inset-0 bg-[#1e1e1e] flex items-center justify-center z-10">
+              <div className="absolute inset-0 bg-[#131110] flex items-center justify-center z-10">
                 <div className="flex items-center gap-2 text-slate-500 text-sm">
                   <svg className="w-4 h-4 animate-spin text-amber-400" viewBox="0 0 24 24" fill="none">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
@@ -957,10 +957,56 @@ export default function WorkspaceClient({
               defaultLanguage={languageForFilename(activeFile)}
               value={files[activeFile] ?? ""}
               onChange={handleCodeChange}
+              beforeMount={(monaco) => {
+                // Custom theme so the editor + Find widget + scrollbars
+                // match the warm dark + amber palette instead of VS Code's
+                // stock cold blue. Registered once per page load.
+                monaco.editor.defineTheme("mentivo-warm", {
+                  base: "vs-dark",
+                  inherit: true,
+                  rules: [],
+                  colors: {
+                    "editor.background": "#131110",
+                    "editor.foreground": "#fafaf9",
+                    "editorLineNumber.foreground": "#57534e",
+                    "editorLineNumber.activeForeground": "#a8a29e",
+                    "editor.lineHighlightBackground": "#1a1716",
+                    "editor.lineHighlightBorder": "#00000000",
+                    "editor.selectionBackground": "#f59e0b40",
+                    "editor.inactiveSelectionBackground": "#f59e0b20",
+                    "editor.findMatchBackground": "#f59e0b40",
+                    "editor.findMatchHighlightBackground": "#f59e0b20",
+                    "editorCursor.foreground": "#f59e0b",
+                    "editorIndentGuide.background1": "#292524",
+                    "editorIndentGuide.activeBackground1": "#44403c",
+                    "editorBracketMatch.background": "#f59e0b20",
+                    "editorBracketMatch.border": "#f59e0b60",
+                    "editorWidget.background": "#1a1716",
+                    "editorWidget.border": "#292524",
+                    "editorWidget.foreground": "#fafaf9",
+                    "input.background": "#0b0a09",
+                    "input.foreground": "#fafaf9",
+                    "input.border": "#292524",
+                    "inputOption.activeBackground": "#f59e0b40",
+                    "inputOption.activeBorder": "#f59e0b",
+                    "inputOption.activeForeground": "#fafaf9",
+                    focusBorder: "#f59e0b",
+                    "editorSuggestWidget.background": "#1a1716",
+                    "editorSuggestWidget.border": "#292524",
+                    "editorSuggestWidget.foreground": "#fafaf9",
+                    "editorSuggestWidget.selectedBackground": "#f59e0b30",
+                    "editorSuggestWidget.highlightForeground": "#fbbf24",
+                    "scrollbarSlider.background": "#44403c50",
+                    "scrollbarSlider.hoverBackground": "#57534e80",
+                    "scrollbarSlider.activeBackground": "#78716c",
+                    "editorGutter.background": "#131110",
+                  },
+                });
+              }}
               onMount={(editor) => {
                 editorRef.current = editor;
               }}
-              theme="vs-dark"
+              theme="mentivo-warm"
               options={{
                 fontSize: 13,
                 fontFamily: "'Geist Mono', 'Fira Code', monospace",
@@ -974,6 +1020,7 @@ export default function WorkspaceClient({
                 padding: { top: 12, bottom: 12 },
                 tabSize: 2,
                 formatOnPaste: true,
+                stickyScroll: { enabled: false },
               }}
             />
           </div>
@@ -997,7 +1044,7 @@ export default function WorkspaceClient({
             `}
             style={{ height: mobileTab === "preview" ? "100%" : `${previewPct}%` }}
           >
-            <div className="h-8 flex-shrink-0 flex items-center justify-between px-3 bg-[#0d0f1a] border-b border-white/[0.07]">
+            <div className="h-8 flex-shrink-0 flex items-center justify-between px-3 bg-[#131110] border-b border-white/[0.07]">
               <div className="flex items-center gap-1.5">
                 <div className="w-2 h-2 rounded-full bg-red-500/60" />
                 <div className="w-2 h-2 rounded-full bg-yellow-500/60" />
@@ -1029,7 +1076,7 @@ export default function WorkspaceClient({
             className={`flex flex-col min-h-0 ${mobileTab === "preview" ? "hidden lg:flex" : "flex"}`}
             style={{ flex: mobileTab === "chat" ? "1" : "1 1 0" }}
           >
-            <div className="h-8 flex-shrink-0 flex items-center gap-2 px-3 bg-[#0d0f1a] border-b border-white/[0.07]">
+            <div className="h-8 flex-shrink-0 flex items-center gap-2 px-3 bg-[#131110] border-b border-white/[0.07]">
               <div className="w-4 h-4 rounded bg-amber-500/20 border border-amber-500/30 flex items-center justify-center">
                 <Image src="/logo-mark.png" alt="M" width={10} height={10} className="rounded-sm" />
               </div>
